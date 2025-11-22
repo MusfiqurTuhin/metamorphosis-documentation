@@ -249,8 +249,8 @@ if "mermaid_code" not in st.session_state:
     B --> C["End"];"""
 
 if app_mode == "Diagram Live Editor":
-    st.markdown("### ⚡ Live Diagram Editor")
-    st.info("Describe your flow below. The AI will draft it, then you can edit the code live on the left and see results on the right.")
+    st.markdown("### ⚡ Live Diagram Preview")
+    st.info("Describe your flow below. The AI will generate the diagram visually.")
     
     client_scenario = st.text_area("Describe Diagram Requirements:", height=100)
     
@@ -272,43 +272,32 @@ if app_mode == "Diagram Live Editor":
 
     st.markdown("---")
     
-    # SPLIT SCREEN LIVE EDITOR
-    col1, col2 = st.columns([1, 1])
-    
-    with col1:
-        st.markdown("#### 💻 Mermaid Code (Editable)")
-        # The text area updates session state directly
-        new_code = st.text_area("Code Editor", value=st.session_state.mermaid_code, height=400, key="editor_area")
-        if new_code != st.session_state.mermaid_code:
-            st.session_state.mermaid_code = new_code
-            st.rerun()
-
-    with col2:
-        st.markdown("#### 👁️ Live Preview")
-        try:
-            # Use standard mermaid block
-            st.markdown(f"```mermaid\n{st.session_state.mermaid_code}\n```")
-        except Exception:
-            st.error("Syntax Error in Mermaid Code")
-            
-        # OPEN IN REAL MERMAID LIVE BUTTON
-        st.markdown("<br>", unsafe_allow_html=True)
-        live_url = generate_mermaid_link(st.session_state.mermaid_code)
-        st.markdown(f"""
-            <a href="{live_url}" target="_blank" style="text-decoration: none;">
-                <button style="
-                    background-color: {PRIMARY_COLOR}; 
-                    color: white; 
-                    padding: 10px 20px; 
-                    border: none; 
-                    border-radius: 5px; 
-                    font-weight: bold; 
-                    cursor: pointer; 
-                    width: 100%;">
-                    🚀 Open in Mermaid.live (External)
-                </button>
-            </a>
-        """, unsafe_allow_html=True)
+    # DISPLAY PREVIEW ONLY (No Split Columns)
+    st.markdown("#### 👁️ Visual Preview")
+    try:
+        # Use standard mermaid block
+        st.markdown(f"```mermaid\n{st.session_state.mermaid_code}\n```")
+    except Exception:
+        st.error("Syntax Error in Mermaid Code")
+        
+    # OPEN IN REAL MERMAID LIVE BUTTON
+    st.markdown("<br>", unsafe_allow_html=True)
+    live_url = generate_mermaid_link(st.session_state.mermaid_code)
+    st.markdown(f"""
+        <a href="{live_url}" target="_blank" style="text-decoration: none;">
+            <button style="
+                background-color: {PRIMARY_COLOR}; 
+                color: white; 
+                padding: 10px 20px; 
+                border: none; 
+                border-radius: 5px; 
+                font-weight: bold; 
+                cursor: pointer; 
+                width: 100%;">
+                🚀 Open in Mermaid.live (External)
+            </button>
+        </a>
+    """, unsafe_allow_html=True)
 
 else:
     # FULL DOCUMENT GENERATOR LOGIC (Standard)
