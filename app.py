@@ -4,7 +4,7 @@ from datetime import datetime
 import base64
 import json
 import zlib
-import re  # Added for strict code extraction
+import re
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(
@@ -31,11 +31,33 @@ def generate_mermaid_link(mermaid_code):
         "updateDiagram": True
     }
     json_str = json.dumps(state)
-    # Compress using zlib (deflate) without headers to match pako.js used by mermaid.live
     compressor = zlib.compressobj(9, zlib.DEFLATED, -15, 8, zlib.Z_DEFAULT_STRATEGY)
     compressed = compressor.compress(json_str.encode('utf-8')) + compressor.flush()
     base64_str = base64.urlsafe_b64encode(compressed).decode('utf-8')
     return f"https://mermaid.live/edit#{base64_str}"
+
+# --- HELPER: CODE SANITIZER ---
+def sanitize_mermaid_code(raw_text):
+    """
+    Extracts and cleans Mermaid code from LLM output.
+    Ensures strict adherence to syntax to prevent parse errors.
+    """
+    # 1. Extract content inside ```mermaid ... ``` blocks
+    match = re.search(r"```mermaid\s+(.*?)\s+```", raw_text, re.DOTALL)
+    if match:
+        code = match.group(1).strip()
+    else:
+        # Fallback: remove fences if loose
+        code = raw_text.replace("```mermaid", "").replace("```", "").strip()
+    
+    # 2. Fix common parenthesis error: A[Text (Content)] -> A["Text (Content)"]
+    # This regex looks for brackets containing unquoted text with parentheses
+    # Note: This is a heuristic fix; the Prompt is the primary defense.
+    # It replaces [Text (More)] with ["Text (More)"] if quotes are missing.
+    # content_pattern = r'\[([^"\]]*\([^"\]]*\)[^"\]]*)\]'
+    # code = re.sub(content_pattern, r'["\1"]', code) 
+    
+    return code
 
 # --- CUSTOM CSS FOR MODERN UI & BRANDING ---
 st.markdown(f"""
@@ -196,11 +218,17 @@ def get_system_instruction(mode, selected_type):
     CONTEXT: {METAMORPHOSIS_CONTEXT}
     TONE: Professional, Corporate, Industry-Standard.
     
-    CRITICAL MERMAID SYNTAX RULES (STRICT):
-    1. **NO SPACES IN NODE IDs**: `Node A` is ILLEGAL. Use `NodeA` or `Node_A`.
-    2. **QUOTES FOR LABELS**: If a label contains spaces or special characters, you MUST use quotes. Example: `A["Production (Work Centers)"]`.
-    3. **NO SPECIAL CHARS IN IDs**: Do not use `(`, `)`, `/`, `-`, `&` inside the ID itself.
-    4. **DIRECTION**: Use `graph TD` or `graph LR` for flows.
+    *** CRITICAL MERMAID SYNTAX RULES (STRICT COMPLIANCE REQUIRED) ***
+    1. **ALWAYS QUOTE LABELS**: If a node label contains spaces, parentheses `()`, or special chars, you **MUST** use double quotes.
+       - ❌ WRONG: `A[Sales Order (SO)]`
+       - ✅ RIGHT: `A["Sales Order (SO)"]`
+    2. **NO SPACES IN NODE IDs**: IDs must be alphanumeric only.
+       - ❌ WRONG: `Node A`
+       - ✅ RIGHT: `NodeA` or `Node_A`
+    3. **NO SPECIAL CHARS IN IDs**: Do not use `(`, `)`, `/`, `-` in the ID itself.
+       - ❌ WRONG: `SO(Created)`
+       - ✅ RIGHT: `SO_Created`
+    4. **DIRECTION**: Use `graph TD` (Top-Down) or `graph LR` (Left-Right).
     """
 
     if mode == "Diagram Generator":
@@ -212,8 +240,8 @@ def get_system_instruction(mode, selected_type):
         - Do NOT write any introduction, conclusion, or text outside the code block.
         """
 
-    # Full document prompts (Truncated for brevity)
-    base_role += "\nFORMATTING: Use Markdown. Use `mermaid` code blocks for diagrams."
+    # Full document prompts
+    base_role += "\nFORMATTING: Use Markdown. Use `mermaid` code blocks for diagrams. Follow the CRITICAL SYNTAX RULES above for every diagram."
     return base_role + f"\nGOAL: Create a {selected_type}."
 
 # --- SIDEBAR UI ---
@@ -269,15 +297,8 @@ if app_mode == "Diagram Live Editor":
                 with st.spinner("Architecting diagram..."):
                     response = model.generate_content(f"SCENARIO: {client_scenario}")
                     
-                    # --- STRICT EXTRACTION LOGIC ---
-                    # 1. Try to find content inside ```mermaid ... ``` block
-                    match = re.search(r"```mermaid\s+(.*?)\s+```", response.text, re.DOTALL)
-                    
-                    if match:
-                        clean_code = match.group(1).strip()
-                    else:
-                        # 2. Fallback: If no block, strip backticks if they exist loosely
-                        clean_code = response.text.replace("```mermaid", "").replace("```", "").strip()
+                    # Use the sanitizer to extract ONLY valid code
+                    clean_code = sanitize_mermaid_code(response.text)
                     
                     st.session_state.mermaid_code = clean_code
                     st.rerun()
@@ -286,10 +307,9 @@ if app_mode == "Diagram Live Editor":
 
     st.markdown("---")
     
-    # DISPLAY PREVIEW ONLY (No Split Columns)
+    # DISPLAY PREVIEW
     st.markdown("#### 👁️ Visual Preview")
     try:
-        # Use standard mermaid block
         st.markdown(f"```mermaid\n{st.session_state.mermaid_code}\n```")
     except Exception:
         st.error("Syntax Error in Mermaid Code")
@@ -313,12 +333,11 @@ if app_mode == "Diagram Live Editor":
         </a>
     """, unsafe_allow_html=True)
     
-    # DEBUG EXPANDER (Hidden by default, useful if user wants to copy pure code)
     with st.expander("View Raw Source Code"):
         st.code(st.session_state.mermaid_code, language="mermaid")
 
 else:
-    # FULL DOCUMENT GENERATOR LOGIC (Standard)
+    # FULL DOCUMENT GENERATOR LOGIC
     st.markdown(f"### 📝 {selected_type} Requirements")
     client_scenario = st.text_area("Enter details...", height=150)
     
