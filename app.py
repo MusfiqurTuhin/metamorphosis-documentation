@@ -221,7 +221,7 @@ def get_system_instruction(mode, selected_type):
     3. **NO SPECIAL CHARS IN IDs**: Do not use `(`, `)`, `/`, `-` in the ID itself.
        - ❌ WRONG: `SO(Created)`
        - ✅ RIGHT: `SO_Created`
-    4. **DIRECTION**: Use `graph TD` (Top-Down) or `graph LR` (Left-Right).
+    4. **DIRECTION**: ALWAYS use `graph TD` (Top-Down). Do NOT use Left-Right (`LR`) direction. The output MUST be vertical to be A4 compatible.
     """
 
     if mode == "Diagram Generator":
