@@ -50,13 +50,6 @@ def sanitize_mermaid_code(raw_text):
         # Fallback: remove fences if loose
         code = raw_text.replace("```mermaid", "").replace("```", "").strip()
     
-    # 2. Fix common parenthesis error: A[Text (Content)] -> A["Text (Content)"]
-    # This regex looks for brackets containing unquoted text with parentheses
-    # Note: This is a heuristic fix; the Prompt is the primary defense.
-    # It replaces [Text (More)] with ["Text (More)"] if quotes are missing.
-    # content_pattern = r'\[([^"\]]*\([^"\]]*\)[^"\]]*)\]'
-    # code = re.sub(content_pattern, r'["\1"]', code) 
-    
     return code
 
 # --- CUSTOM CSS FOR MODERN UI & BRANDING ---
@@ -281,6 +274,10 @@ if "mermaid_code" not in st.session_state:
     A["Start"] --> B["Process"];
     B --> C["End"];"""
 
+# Initialize session state for full document content if not exists
+if "doc_content" not in st.session_state:
+    st.session_state.doc_content = ""
+
 if app_mode == "Diagram Live Editor":
     st.markdown("### ⚡ Live Diagram Preview")
     st.info("Describe your flow below. The AI will generate the diagram visually.")
@@ -345,20 +342,26 @@ else:
         if not api_key:
             st.error("Missing API Key")
         else:
-            genai.configure(api_key=api_key)
-            model = genai.GenerativeModel("gemini-2.5-flash", system_instruction=get_system_instruction(app_mode, selected_type))
-            with st.spinner("Generating..."):
-                response = model.generate_content(f"SCENARIO: {client_scenario}")
-                doc_content = response.text
-                
-                st.markdown(f"""<div class="document-container"><h2>{selected_type}</h2>{doc_content}</div>""", unsafe_allow_html=True)
-                
-                st.download_button(
-                    label="📥 Download Document",
-                    data=doc_content,
-                    file_name=f"{selected_type}_Metamorphosis.md",
-                    mime="text/markdown"
-                )
+            try:
+                genai.configure(api_key=api_key)
+                model = genai.GenerativeModel("gemini-2.5-flash", system_instruction=get_system_instruction(app_mode, selected_type))
+                with st.spinner("Generating..."):
+                    response = model.generate_content(f"SCENARIO: {client_scenario}")
+                    # Store the result in session state so it persists
+                    st.session_state.doc_content = response.text
+            except Exception as e:
+                st.error(f"An error occurred during generation: {e}")
+
+    # Display the content if it exists in session state
+    if st.session_state.doc_content:
+        st.markdown(f"""<div class="document-container"><h2>{selected_type}</h2>{st.session_state.doc_content}</div>""", unsafe_allow_html=True)
+        
+        st.download_button(
+            label="📥 Download Document",
+            data=st.session_state.doc_content,
+            file_name=f"{selected_type}_Metamorphosis.md",
+            mime="text/markdown"
+        )
 
 # --- FOOTER ---
 st.markdown(
