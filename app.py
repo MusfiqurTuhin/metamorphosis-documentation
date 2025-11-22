@@ -6,73 +6,134 @@ from datetime import datetime
 st.set_page_config(
     page_title="Metamorphosis Architect",
     page_icon="🦋",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
 # --- BRAND COLORS ---
-# Derived from the Metamorphosis logo
-PRIMARY_COLOR = "#002F55"  # Dark Blue
-SECONDARY_COLOR = "#70D0C6" # Light Teal
-BACKGROUND_COLOR = "#FFFFFF" # White
-TEXT_COLOR = "#000000"       # Black
+PRIMARY_COLOR = "#ED6523"  # Metamorphosis Orange
+SECONDARY_COLOR = "#FFF0E6" # Very Light Orange/Cream for backgrounds
+ACCENT_COLOR = "#2C3E50"    # Dark Slate Blue for contrast text
+BACKGROUND_COLOR = "#F8F9FA" # Modern Light Grey/White for app background
+WHITE = "#FFFFFF"
 
-# --- CUSTOM CSS FOR BRANDING & DOCUMENTS ---
+# --- CUSTOM CSS FOR MODERN UI & BRANDING ---
 st.markdown(f"""
     <style>
-    /* --- General App Styling --- */
-    /* Main Title and Headers */
-    h1, h2, h3, h4, h5, h6, span[data-testid="stHeader"] {{
-        color: {PRIMARY_COLOR} !important;
-        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+    /* --- FORCE LIGHT THEME & BACKGROUND --- */
+    .stApp {{
+        background-color: {BACKGROUND_COLOR};
+        color: {ACCENT_COLOR};
     }}
     
-    /* Sidebar Styling */
+    /* --- SIDEBAR STYLING --- */
     [data-testid="stSidebar"] {{
-        background-color: #f0f6f9 !important; /* A very light tint of the teal */
-        border-right: 2px solid {SECONDARY_COLOR};
+        background-color: {WHITE} !important;
+        border-right: 1px solid #E0E0E0;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.05);
     }}
     
-    /* Buttons */
-    div.stButton > button {{
-        background-color: {PRIMARY_COLOR} !important;
-        color: {BACKGROUND_COLOR} !important;
-        border: none !important;
-        border-radius: 5px !important;
-        padding: 0.5rem 1rem !important;
-        font-weight: bold !important;
+    /* --- TYPOGRAPHY & HEADERS --- */
+    h1, h2, h3, h4, h5, h6, span[data-testid="stHeader"] {{
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+        color: {ACCENT_COLOR} !important;
     }}
-    div.stButton > button:hover {{
-        background-color: {SECONDARY_COLOR} !important;
-        color: {PRIMARY_COLOR} !important;
+    
+    h1 {{
+        font-weight: 800 !important;
+        letter-spacing: -0.5px;
+    }}
+    
+    /* Specific coloring for the main title gradient effect (simulated) */
+    .main-title {{
+        background: -webkit-linear-gradient(45deg, {PRIMARY_COLOR}, #FF8C42);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }}
 
-    /* --- Document Content Styling (Times New Roman) --- */
-    /* Target the main markdown output */
+    /* --- INPUT FIELDS & CARDS --- */
+    /* Text Area styling */
+    .stTextArea textarea {{
+        border: 1px solid #E0E0E0 !important;
+        border-radius: 10px !important;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important;
+        padding: 15px !important;
+        background-color: {WHITE} !important;
+        color: {ACCENT_COLOR} !important;
+    }}
+    .stTextArea textarea:focus {{
+        border-color: {PRIMARY_COLOR} !important;
+        box-shadow: 0 0 0 2px {SECONDARY_COLOR} !important;
+    }}
+    
+    /* Selectbox styling */
+    div[data-baseweb="select"] > div {{
+        border-radius: 8px !important;
+        background-color: {WHITE} !important;
+        border: 1px solid #E0E0E0 !important;
+    }}
+
+    /* --- BUTTONS --- */
+    div.stButton > button {{
+        background: linear-gradient(90deg, {PRIMARY_COLOR} 0%, #FF7E35 100%) !important;
+        color: {WHITE} !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 0.6rem 2rem !important;
+        font-weight: 600 !important;
+        font-size: 16px !important;
+        box-shadow: 0 4px 14px 0 rgba(237, 101, 35, 0.39) !important;
+        transition: transform 0.2s ease-in-out !important;
+        width: 100%;
+    }}
+    div.stButton > button:hover {{
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px 0 rgba(237, 101, 35, 0.29) !important;
+    }}
+
+    /* --- GENERATED DOCUMENT STYLING (PAPER LOOK) --- */
+    .document-container {{
+        background-color: {WHITE};
+        padding: 40px;
+        border-radius: 4px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        border: 1px solid #EAEAEA;
+        margin-top: 20px;
+    }}
+    
+    /* Text styles inside the document container */
     .stMarkdown p, .stWrite p, div[data-testid="stMarkdownContainer"] p, 
     .stMarkdown li, .stWrite li, div[data-testid="stMarkdownContainer"] li {{
         font-family: 'Times New Roman', Times, serif !important;
         font-size: 18px !important;
-        line-height: 1.6 !important;
-        color: {TEXT_COLOR} !important;
+        line-height: 1.8 !important;
+        color: #000000 !important; /* Pure black for document text */
     }}
     
-    /* Headers within the generated document */
+    /* Headers inside the document */
     div[data-testid="stMarkdownContainer"] h1, 
-    div[data-testid="stMarkdownContainer"] h2, 
-    div[data-testid="stMarkdownContainer"] h3 {{
+    div[data-testid="stMarkdownContainer"] h2 {{
         font-family: 'Times New Roman', Times, serif !important;
         color: {PRIMARY_COLOR} !important;
-        margin-top: 1.5em !important;
+        border-bottom: 2px solid {SECONDARY_COLOR};
+        padding-bottom: 10px;
+        margin-top: 30px !important;
+    }}
+    
+    div[data-testid="stMarkdownContainer"] h3 {{
+        font-family: 'Times New Roman', Times, serif !important;
+        color: #333 !important;
+        margin-top: 25px !important;
     }}
 
-    /* --- Mermaid Diagram Styling --- */
+    /* --- MERMAID DIAGRAM STYLING --- */
     .mermaid {{
-        background-color: #f9f9f9;
-        padding: 20px;
-        border-radius: 10px;
-        border: 1px solid #e0e0e0;
-        margin: 20px 0;
-        font-family: 'Times New Roman', Times, serif !important;
+        background-color: #FAFAFA;
+        padding: 25px;
+        border-radius: 8px;
+        border: 1px solid #EEEEEE;
+        margin: 25px 0;
+        text-align: center;
     }}
     </style>
     """, unsafe_allow_html=True)
@@ -219,11 +280,17 @@ def get_system_instruction(doc_type):
 
 # --- SIDEBAR UI ---
 with st.sidebar:
-    # Use the primary color for the logo text
-    st.markdown(f"<h1 style='color: {PRIMARY_COLOR};'>Metamorphosis Architect</h1>", unsafe_allow_html=True)
-    st.markdown(f"<h3 style='color: {SECONDARY_COLOR};'>Configuration</h3>", unsafe_allow_html=True)
+    # Branding Header
+    st.markdown(f"""
+        <div style="text-align: center; margin-bottom: 20px;">
+            <h1 style="color: {PRIMARY_COLOR}; font-size: 28px; margin-bottom: 0;">🦋</h1>
+            <h2 style="color: {ACCENT_COLOR}; font-size: 20px; font-weight: 700; margin-top: 5px;">Metamorphosis</h2>
+        </div>
+        """, unsafe_allow_html=True)
     
-    api_key = st.text_input("🔑 Google Gemini API Key", type="password", help="Get this from Google AI Studio")
+    st.markdown("### 🛠️ Configuration")
+    
+    api_key = st.text_input("🔑 Gemini API Key", type="password", help="Get this from Google AI Studio")
     
     doc_type = st.selectbox(
         "📄 Document Type",
@@ -238,31 +305,40 @@ with st.sidebar:
         ]
     )
     
-    st.info(f"**Mode:** {doc_type}\n\nGenerates professional docs tailored for Odoo Implementation with Metamorphosis branding.")
+    st.markdown("---")
+    st.info(f"**Generating:** {doc_type}\n\n Tailored for Odoo ERP Implementation.")
 
 # --- MAIN UI ---
-# Use the primary color for the main title
-st.markdown(f"<h1 style='color: {PRIMARY_COLOR}; text-align: center;'>🦋 Metamorphosis Document Architect</h1>", unsafe_allow_html=True)
-st.markdown(f"<h3 style='color: {SECONDARY_COLOR}; text-align: center;'>Generate Professional ERP Documentation</h3>", unsafe_allow_html=True)
+# Main Header with clean modern style
+st.markdown(f"""
+    <div style="padding: 20px 0; text-align: center;">
+        <h1 class="main-title" style="font-size: 42px; margin-bottom: 10px;">Metamorphosis Architect</h1>
+        <p style="color: {ACCENT_COLOR}; font-size: 18px; opacity: 0.8;">
+            Professional ERP Documentation Generator
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
+# Scenario Input Card
+st.markdown(f"### 📝 Client Scenario")
 client_scenario = st.text_area(
-    "📝 Client Scenario / Requirements",
+    "Enter requirements here...",
     height=150,
-    placeholder="Example: A textile manufacturing company in Narayanganj with 400 employees. They are facing issues with inventory tracking, wastage management, and syncing accounting with production. They need a full Odoo implementation."
+    placeholder="e.g. A textile manufacturing company in Narayanganj with 400 employees. They are facing issues with inventory tracking, wastage management, and syncing accounting with production...",
+    label_visibility="collapsed"
 )
 
-# Use a container to center the button
-with st.container():
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        generate_btn = st.button("🚀 Generate Document", type="primary", use_container_width=True)
+# Action Button centered
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    generate_btn = st.button(f"🚀 Generate {doc_type.split()[0]}", type="primary", use_container_width=True)
 
 # --- GENERATION LOGIC ---
 if generate_btn:
     if not api_key:
         st.error("Please enter your Gemini API Key in the sidebar.")
     elif not client_scenario:
-        st.warning("Please enter a client scenario.")
+        st.warning("Please describe the client scenario first.")
     else:
         try:
             # Configure API
@@ -275,7 +351,7 @@ if generate_btn:
             )
 
             # UI Feedback
-            with st.spinner(f"Architecting your {doc_type}... this takes about 20-30 seconds..."):
+            with st.spinner(f"Architecting your {doc_type}... Please wait..."):
                 # Generate
                 response = model.generate_content(f"CLIENT SCENARIO: {client_scenario}")
                 doc_content = response.text
@@ -283,30 +359,31 @@ if generate_btn:
             # Display Result
             st.success("✅ Document Generated Successfully!")
             
-            # Layout for title and content
-            st.markdown("---")
-            st.markdown(f"<h2 style='color: {PRIMARY_COLOR};'>{doc_type} for Client</h2>", unsafe_allow_html=True)
+            # Document Container
+            st.markdown(f"""<div class="document-container">""", unsafe_allow_html=True)
             
-            # Render the content with Mermaid diagrams
+            # Render Title
+            st.markdown(f"## {doc_type} for Client")
+            
+            # Render Content with Mermaid Diagrams
             st.markdown(doc_content, unsafe_allow_html=True)
             
-            st.markdown("---")
+            st.markdown("</div>", unsafe_allow_html=True)
 
-            # Download Button
+            # Download Section
+            st.markdown("<br>", unsafe_allow_html=True)
             timestamp = datetime.now().strftime("%Y%m%d_%H%M")
             filename = f"{doc_type.split()[0]}_Metamorphosis_{timestamp}.md"
             
-            # Use a container to center the download button
-            with st.container():
-                col1, col2, col3 = st.columns([1, 2, 1])
-                with col2:
-                    st.download_button(
-                        label="📥 Download Document (.md)",
-                        data=doc_content,
-                        file_name=filename,
-                        mime="text/markdown",
-                        use_container_width=True
-                    )
+            c1, c2, c3 = st.columns([1, 2, 1])
+            with c2:
+                st.download_button(
+                    label="📥 Download Document (.md)",
+                    data=doc_content,
+                    file_name=filename,
+                    mime="text/markdown",
+                    use_container_width=True
+                )
 
         except Exception as e:
             st.error(f"An error occurred: {e}")
@@ -314,8 +391,8 @@ if generate_btn:
 # --- FOOTER ---
 st.markdown(
     f"""
-    <div style='position: fixed; bottom: 0; width: 100%; text-align: center; color: {PRIMARY_COLOR}; font-size: 12px; padding: 10px; background-color: {BACKGROUND_COLOR}; border-top: 1px solid #e0e0e0;'>
-        Powered by Google Gemini 2.0 | Metamorphosis Systems Internal Tool
+    <div style='position: fixed; bottom: 0; left: 0; width: 100%; text-align: center; color: #888; font-size: 12px; padding: 15px; background-color: {WHITE}; border-top: 1px solid #EEE; z-index: 100;'>
+        Powered by Google Gemini 2.5 | Metamorphosis Systems Internal Tool
     </div>
     """, 
     unsafe_allow_html=True
