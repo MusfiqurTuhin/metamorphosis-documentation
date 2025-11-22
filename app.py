@@ -66,8 +66,8 @@ st.markdown(f"""
         box-shadow: 0 0 0 2px {SECONDARY_COLOR} !important;
     }}
     
-    /* Selectbox styling - Fixed White Text Issue */
-    div[data-baseweb="select"] > div {{
+    /* Selectbox & Radio styling */
+    div[data-baseweb="select"] > div, div[data-baseweb="radio"] {{
         border-radius: 8px !important;
         background-color: {WHITE} !important;
         border: 1px solid #E0E0E0 !important;
@@ -78,6 +78,11 @@ st.markdown(f"""
         color: {ACCENT_COLOR} !important; 
     }}
     div[data-baseweb="select"] span {{
+        color: {ACCENT_COLOR} !important;
+    }}
+    
+    /* Radio button text color */
+    div[role="radiogroup"] label p {{
         color: {ACCENT_COLOR} !important;
     }}
 
@@ -173,16 +178,13 @@ METHODOLOGY (6 Stages):
 """
 
 # --- PROMPT ENGINEERING FUNCTIONS ---
-def get_system_instruction(doc_type):
-    """Returns the specific persona and structure based on doc type."""
+def get_system_instruction(mode, selected_type):
+    """Returns the specific persona and structure based on mode and type."""
     
     base_role = f"""
-    ROLE: You are the Senior Solutions Architect and Lead Technical Writer for Metamorphosis Ltd.
+    ROLE: You are the Senior Solutions Architect for Metamorphosis Ltd.
     CONTEXT: {METAMORPHOSIS_CONTEXT}
     TONE: Professional, Corporate, Industry-Standard.
-    FORMATTING: 
-    - Use Markdown for structure.
-    - For any diagrams, charts, or flows, you MUST use a `mermaid` code block.
     
     CRITICAL MERMAID SYNTAX RULES (VERY STRICT):
     1. **NO SPACES IN NODE IDs**: `Node A` is ILLEGAL. Use `NodeA` or `Node_A`.
@@ -190,19 +192,36 @@ def get_system_instruction(doc_type):
        - WRONG: `A[Production (Work Centers)]`
        - RIGHT: `A["Production (Work Centers)"]`
     3. **AVOID SPECIAL CHARACTERS IN IDs**: Do not use `(`, `)`, `/`, or `-` inside the ID itself.
-    4. **SIMPLE SYNTAX**: Use `graph TD` for flowcharts.
-    5. **VALIDATION**: Before outputting, check: Did I use quotes for text? Did I remove spaces from IDs?
-    
-    Example of Valid Syntax:
-      ```mermaid
-      graph TD;
-          Start["Start Process"] --> Decision{"Is Valid?"};
-          Decision -- Yes --> Process["Process Data (Clean)"];
-          Decision -- No --> End["End Process"];
-      ```
+    4. **VALIDATION**: Before outputting, check: Did I use quotes for text? Did I remove spaces from IDs?
     """
 
-    if doc_type == "Proposal":
+    # --- LOGIC FOR DIAGRAM ONLY MODE ---
+    if mode == "Diagram Generator":
+        return base_role + f"""
+        GOAL: Generate a {selected_type} using MermaidJS syntax based on the user's description.
+        OUTPUT FORMAT:
+        - Provide a brief title (H2).
+        - Provide the Mermaid code block.
+        - Keep explanations minimal.
+        
+        SPECIFIC DIAGRAM INSTRUCTIONS:
+        - If Flowchart: Use `graph TD` or `graph LR`.
+        - If Sequence: Use `sequenceDiagram`.
+        - If ERD: Use `erDiagram`.
+        - If Gantt: Use `gantt`.
+        - If Class: Use `classDiagram`.
+        - If State: Use `stateDiagram-v2`.
+        """
+
+    # --- LOGIC FOR FULL DOCUMENT MODE ---
+    # Base formatting for documents
+    base_role += """
+    FORMATTING: 
+    - Use Markdown for structure.
+    - For any diagrams, charts, or flows, you MUST use a `mermaid` code block.
+    """
+
+    if selected_type == "Proposal":
         return base_role + """
         GOAL: Create a Sales Proposal.
         STRUCTURE:
@@ -215,10 +234,9 @@ def get_system_instruction(doc_type):
         7. Investment & Timeline (Estimate)
         """
     
-    elif doc_type == "BRD (Business Req Doc)":
+    elif selected_type == "BRD (Business Req Doc)":
         return base_role + """
         GOAL: Create a Business Requirement Document (BRD).
-        FOCUS: Business goals, stakeholders, scope, and high-level constraints.
         STRUCTURE:
         1. Project Background
         2. Business Objectives (SMART goals)
@@ -228,70 +246,64 @@ def get_system_instruction(doc_type):
         6. Business Risks
         """
 
-    elif doc_type == "SRS (Software Req Spec)":
+    elif selected_type == "SRS (Software Req Spec)":
         return base_role + """
         GOAL: Create a Software Requirements Specification (SRS).
-        FOCUS: Functional and Non-Functional requirements.
         STRUCTURE:
         1. Introduction
         2. Functional Requirements (Detailed Features, User Stories)
         3. System Architecture - **Include a high-level Mermaid component diagram (graph TD).**
-        4. Non-Functional Requirements (Performance, Security, Reliability)
-        5. System Interfaces (Odoo API, External Hardware)
+        4. Non-Functional Requirements
+        5. System Interfaces
         6. User Roles & Permissions
         """
 
-    elif doc_type == "TRD (Technical Req Doc)":
+    elif selected_type == "TRD (Technical Req Doc)":
         return base_role + """
         GOAL: Create a Technical Requirements Document (TRD).
-        FOCUS: Technology stack, Odoo architecture, Server specs.
         STRUCTURE:
-        1. System Architecture (Odoo.sh / On-premise) - **Include a detailed Mermaid deployment diagram.**
+        1. System Architecture - **Include a detailed Mermaid deployment diagram.**
         2. Database Design - **Include a Mermaid Entity-Relationship Diagram (ERD) for key modules (erDiagram).**
-        3. Tech Stack (Python, XML, JS, PostgreSQL)
-        4. Integration Details (API Endpoints) - **Include a Mermaid sequence diagram (sequenceDiagram) for a key API interaction.**
-        5. Security Protocols (SSL, Access Control)
+        3. Tech Stack
+        4. Integration Details - **Include a Mermaid sequence diagram (sequenceDiagram) for a key API interaction.**
+        5. Security Protocols
         6. Server Specifications
         """
 
-    elif doc_type == "HLD (High-Level Design)":
+    elif selected_type == "HLD (High-Level Design)":
         return base_role + """
         GOAL: Create a High-Level Design (HLD) document.
-        FOCUS: System modularity, data flow, and architectural diagrams.
         STRUCTURE:
         1. Architectural Overview - **Include a Mermaid high-level system architecture diagram.**
         2. Component Diagram - **Include a Mermaid diagram showing Odoo modules and their interactions.**
-        3. Data Flow Diagrams (DFD) - **Include a Mermaid flowchart illustrating the flow of data between major components (e.g., Sales -> Inventory -> Accounting).**
+        3. Data Flow Diagrams (DFD) - **Include a Mermaid flowchart illustrating the flow of data.**
         4. Technology Dependencies
         5. Deployment Strategy
         """
         
-    elif doc_type == "API Documentation":
+    elif selected_type == "API Documentation":
         return base_role + """
         GOAL: Create API Documentation for custom Odoo endpoints.
-        FOCUS: Endpoints, Methods, Request/Response examples.
         STRUCTURE:
         1. Authentication (XML-RPC / JSON-RPC)
         2. Base URL & Environment
-        3. Authentication Flow - **Include a Mermaid sequence diagram (sequenceDiagram) showing how to authenticate and get a session token.**
-        4. Endpoints (List specific endpoints relevant to the scenario)
+        3. Authentication Flow - **Include a Mermaid sequence diagram (sequenceDiagram).**
+        4. Endpoints (List specific endpoints)
            - Method (GET/POST)
            - Payload Params
            - Success Response (JSON)
            - Error Codes
         """
 
-    elif doc_type == "UAT Plan (Test Plan)":
+    elif selected_type == "UAT Plan (Test Plan)":
         return base_role + """
         GOAL: Create a User Acceptance Testing (UAT) Plan.
-        FOCUS: Test cases, acceptance criteria, pass/fail conditions.
         STRUCTURE:
         1. Introduction & Testing Scope
         2. Test Environment Setup
         3. Roles & Responsibilities
-        4. Testing Workflow - **Include a Mermaid flowchart (graph TD) of the defect reporting and resolution process.**
-        5. Test Cases (Table format: ID, Scenario, Steps, Expected Result)
-           - Include cases for Sales, Purchase, Inventory, Accounting.
+        4. Testing Workflow - **Include a Mermaid flowchart (graph TD) of the defect reporting process.**
+        5. Test Cases (Table format)
         6. Sign-off Criteria
         """
 
@@ -311,53 +323,75 @@ with st.sidebar:
     
     api_key = st.text_input("🔑 Gemini API Key", type="password", help="Get this from Google AI Studio")
     
-    doc_type = st.selectbox(
-        "📄 Document Type",
-        [
-            "Proposal",
-            "BRD (Business Req Doc)",
-            "SRS (Software Req Spec)",
-            "TRD (Technical Req Doc)",
-            "HLD (High-Level Design)",
-            "API Documentation",
-            "UAT Plan (Test Plan)"
-        ]
-    )
-    
     st.markdown("---")
-    st.info(f"**Generating:** {doc_type}\n\n Tailored for Odoo ERP Implementation.")
+    
+    # Mode Selection
+    app_mode = st.radio("Select Mode", ["Full Document Generator", "Diagram Generator"])
+    
+    selected_type = ""
+    
+    if app_mode == "Full Document Generator":
+        selected_type = st.selectbox(
+            "📄 Document Type",
+            [
+                "Proposal",
+                "BRD (Business Req Doc)",
+                "SRS (Software Req Spec)",
+                "TRD (Technical Req Doc)",
+                "HLD (High-Level Design)",
+                "API Documentation",
+                "UAT Plan (Test Plan)"
+            ]
+        )
+        st.info(f"Generating comprehensive **{selected_type}**.")
+        
+    else:
+        selected_type = st.selectbox(
+            "📊 Diagram Type",
+            [
+                "Flowchart (Process Flow)",
+                "Sequence Diagram (Interactions)",
+                "ERD (Entity Relationship)",
+                "Gantt Chart (Timeline)",
+                "State Diagram (Status)",
+                "Class Diagram (Structure)",
+                "User Journey (Experience)"
+            ]
+        )
+        st.info(f"Generating specific **{selected_type}** in MermaidJS.")
 
 # --- MAIN UI ---
-# Main Header with clean modern style
+# Main Header
 st.markdown(f"""
     <div style="padding: 20px 0; text-align: center;">
         <h1 class="main-title" style="font-size: 42px; margin-bottom: 10px;">Metamorphosis Architect</h1>
         <p style="color: {ACCENT_COLOR}; font-size: 18px; opacity: 0.8;">
-            Professional ERP Documentation Generator
+            Professional ERP Documentation & Diagram Generator
         </p>
     </div>
     """, unsafe_allow_html=True)
 
 # Scenario Input Card
-st.markdown(f"### 📝 Client Scenario")
+st.markdown(f"### 📝 {app_mode.split()[0]} Requirements")
 client_scenario = st.text_area(
-    "Enter requirements here...",
+    "Enter details here...",
     height=150,
-    placeholder="e.g. A textile manufacturing company in Narayanganj with 400 employees. They are facing issues with inventory tracking, wastage management, and syncing accounting with production...",
+    placeholder="e.g. A sales approval process where Manager approves orders > $5000...",
     label_visibility="collapsed"
 )
 
 # Action Button centered
 col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
-    generate_btn = st.button(f"🚀 Generate {doc_type.split()[0]}", type="primary", use_container_width=True)
+    btn_label = f"🚀 Generate {selected_type.split()[0]}"
+    generate_btn = st.button(btn_label, type="primary", use_container_width=True)
 
 # --- GENERATION LOGIC ---
 if generate_btn:
     if not api_key:
         st.error("Please enter your Gemini API Key in the sidebar.")
     elif not client_scenario:
-        st.warning("Please describe the client scenario first.")
+        st.warning("Please describe the scenario first.")
     else:
         try:
             # Configure API
@@ -366,23 +400,23 @@ if generate_btn:
             # Setup Model
             model = genai.GenerativeModel(
                 model_name="gemini-2.5-flash",
-                system_instruction=get_system_instruction(doc_type)
+                system_instruction=get_system_instruction(app_mode, selected_type)
             )
 
             # UI Feedback
-            with st.spinner(f"Architecting your {doc_type}... Please wait..."):
+            with st.spinner(f"Architecting your {selected_type}... Please wait..."):
                 # Generate
-                response = model.generate_content(f"CLIENT SCENARIO: {client_scenario}")
+                response = model.generate_content(f"SCENARIO: {client_scenario}")
                 doc_content = response.text
 
             # Display Result
-            st.success("✅ Document Generated Successfully!")
+            st.success("✅ Generated Successfully!")
             
             # Document Container
             st.markdown(f"""<div class="document-container">""", unsafe_allow_html=True)
             
             # Render Title
-            st.markdown(f"## {doc_type} for Client")
+            st.markdown(f"## {selected_type}")
             
             # Render Content with Mermaid Diagrams
             st.markdown(doc_content, unsafe_allow_html=True)
@@ -392,13 +426,12 @@ if generate_btn:
             # Download Section
             st.markdown("<br>", unsafe_allow_html=True)
             timestamp = datetime.now().strftime("%Y%m%d_%H%M")
-            filename = f"{doc_type.split()[0]}_Metamorphosis_{timestamp}.md"
+            filename = f"{selected_type.split()[0]}_Metamorphosis_{timestamp}.md"
             
             c1, c2, c3 = st.columns([1, 2, 1])
             with c2:
-                # Updated CSS targets this specifically
                 st.download_button(
-                    label="📥 Download Document (.md)",
+                    label="📥 Download Output (.md)",
                     data=doc_content,
                     file_name=filename,
                     mime="text/markdown",
@@ -412,7 +445,10 @@ if generate_btn:
 st.markdown(
     f"""
     <div style='position: fixed; bottom: 0; left: 0; width: 100%; text-align: center; color: #888; font-size: 12px; padding: 15px; background-color: {WHITE}; border-top: 1px solid #EEE; z-index: 100;'>
-        Powered by Google Gemini 2.5 | Metamorphosis Systems Internal Tool
+        Powered by Google Gemini 2.5 | Metamorphosis Systems Internal Tool | 
+        <a href="https://mermaid.live/" target="_blank" style="color: {PRIMARY_COLOR}; text-decoration: none;">
+            Open Mermaid Live Editor ↗
+        </a>
     </div>
     """, 
     unsafe_allow_html=True
