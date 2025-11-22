@@ -66,15 +66,24 @@ st.markdown(f"""
         box-shadow: 0 0 0 2px {SECONDARY_COLOR} !important;
     }}
     
-    /* Selectbox styling */
+    /* Selectbox styling - Fixed White Text Issue */
     div[data-baseweb="select"] > div {{
         border-radius: 8px !important;
         background-color: {WHITE} !important;
         border: 1px solid #E0E0E0 !important;
+        color: {ACCENT_COLOR} !important;
+    }}
+    /* Ensure dropdown options are visible */
+    div[data-baseweb="popover"] li {{
+        color: {ACCENT_COLOR} !important; 
+    }}
+    div[data-baseweb="select"] span {{
+        color: {ACCENT_COLOR} !important;
     }}
 
     /* --- BUTTONS --- */
-    div.stButton > button {{
+    /* Target both regular buttons and download buttons */
+    div.stButton > button, div[data-testid="stDownloadButton"] > button {{
         background: linear-gradient(90deg, {PRIMARY_COLOR} 0%, #FF7E35 100%) !important;
         color: {WHITE} !important;
         border: none !important;
@@ -86,9 +95,10 @@ st.markdown(f"""
         transition: transform 0.2s ease-in-out !important;
         width: 100%;
     }}
-    div.stButton > button:hover {{
+    div.stButton > button:hover, div[data-testid="stDownloadButton"] > button:hover {{
         transform: translateY(-2px);
         box-shadow: 0 6px 20px 0 rgba(237, 101, 35, 0.29) !important;
+        color: {WHITE} !important;
     }}
 
     /* --- GENERATED DOCUMENT STYLING (PAPER LOOK) --- */
@@ -174,16 +184,20 @@ def get_system_instruction(doc_type):
     - Use Markdown for structure.
     - For any diagrams, charts, or flows, you MUST use a `mermaid` code block.
     
-    CRITICAL MERMAID SYNTAX RULES (STRICT):
-    1. ALWAYS use quotes for node labels. Example: `id["Label Text"]` NOT `id[Label Text]`.
-    2. NEVER use spaces or special characters in Node IDs. Example: `NodeA` NOT `Node A`.
-    3. Use `graph TD` for flowcharts and `sequenceDiagram` for interactions.
-    4. Do not use complex subgraphs if not necessary.
-    5. Example of Valid Syntax:
+    CRITICAL MERMAID SYNTAX RULES (VERY STRICT):
+    1. **NO SPACES IN NODE IDs**: `Node A` is ILLEGAL. Use `NodeA` or `Node_A`.
+    2. **QUOTES FOR LABELS**: If a label contains spaces or special characters (like parens), you MUST use double quotes.
+       - WRONG: `A[Production (Work Centers)]`
+       - RIGHT: `A["Production (Work Centers)"]`
+    3. **AVOID SPECIAL CHARACTERS IN IDs**: Do not use `(`, `)`, `/`, or `-` inside the ID itself.
+    4. **SIMPLE SYNTAX**: Use `graph TD` for flowcharts.
+    5. **VALIDATION**: Before outputting, check: Did I use quotes for text? Did I remove spaces from IDs?
+    
+    Example of Valid Syntax:
       ```mermaid
       graph TD;
           Start["Start Process"] --> Decision{"Is Valid?"};
-          Decision -- Yes --> Process["Process Data"];
+          Decision -- Yes --> Process["Process Data (Clean)"];
           Decision -- No --> End["End Process"];
       ```
     """
@@ -382,6 +396,7 @@ if generate_btn:
             
             c1, c2, c3 = st.columns([1, 2, 1])
             with c2:
+                # Updated CSS targets this specifically
                 st.download_button(
                     label="📥 Download Document (.md)",
                     data=doc_content,
