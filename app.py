@@ -4,6 +4,7 @@ from datetime import datetime
 import base64
 import json
 import zlib
+import re  # Added for strict code extraction
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(
@@ -195,19 +196,23 @@ def get_system_instruction(mode, selected_type):
     CONTEXT: {METAMORPHOSIS_CONTEXT}
     TONE: Professional, Corporate, Industry-Standard.
     
-    CRITICAL MERMAID SYNTAX RULES (VERY STRICT):
+    CRITICAL MERMAID SYNTAX RULES (STRICT):
     1. **NO SPACES IN NODE IDs**: `Node A` is ILLEGAL. Use `NodeA` or `Node_A`.
-    2. **QUOTES FOR LABELS**: If a label contains spaces or special characters, use quotes. Example: `A["Production (Work Centers)"]`.
-    3. **NO SPECIAL CHARS IN IDs**: Do not use `(`, `)`, `/` in IDs.
+    2. **QUOTES FOR LABELS**: If a label contains spaces or special characters, you MUST use quotes. Example: `A["Production (Work Centers)"]`.
+    3. **NO SPECIAL CHARS IN IDs**: Do not use `(`, `)`, `/`, `-`, `&` inside the ID itself.
+    4. **DIRECTION**: Use `graph TD` or `graph LR` for flows.
     """
 
     if mode == "Diagram Generator":
         return base_role + f"""
         GOAL: Generate a {selected_type} using MermaidJS.
-        OUTPUT: ONLY return the valid mermaid code block inside ```mermaid ... ``` tags. Do not add explanations or titles.
+        OUTPUT FORMAT: 
+        - You must output ONLY a single Mermaid code block.
+        - Wrap it in ```mermaid ... ```.
+        - Do NOT write any introduction, conclusion, or text outside the code block.
         """
 
-    # Full document prompts (Truncated for brevity as they are same as before)
+    # Full document prompts (Truncated for brevity)
     base_role += "\nFORMATTING: Use Markdown. Use `mermaid` code blocks for diagrams."
     return base_role + f"\nGOAL: Create a {selected_type}."
 
@@ -263,8 +268,17 @@ if app_mode == "Diagram Live Editor":
                 model = genai.GenerativeModel("gemini-2.5-flash", system_instruction=get_system_instruction(app_mode, selected_type))
                 with st.spinner("Architecting diagram..."):
                     response = model.generate_content(f"SCENARIO: {client_scenario}")
-                    # Extract code from markdown block if present
-                    clean_code = response.text.replace("```mermaid", "").replace("```", "").strip()
+                    
+                    # --- STRICT EXTRACTION LOGIC ---
+                    # 1. Try to find content inside ```mermaid ... ``` block
+                    match = re.search(r"```mermaid\s+(.*?)\s+```", response.text, re.DOTALL)
+                    
+                    if match:
+                        clean_code = match.group(1).strip()
+                    else:
+                        # 2. Fallback: If no block, strip backticks if they exist loosely
+                        clean_code = response.text.replace("```mermaid", "").replace("```", "").strip()
+                    
                     st.session_state.mermaid_code = clean_code
                     st.rerun()
             except Exception as e:
@@ -298,6 +312,10 @@ if app_mode == "Diagram Live Editor":
             </button>
         </a>
     """, unsafe_allow_html=True)
+    
+    # DEBUG EXPANDER (Hidden by default, useful if user wants to copy pure code)
+    with st.expander("View Raw Source Code"):
+        st.code(st.session_state.mermaid_code, language="mermaid")
 
 else:
     # FULL DOCUMENT GENERATOR LOGIC (Standard)
