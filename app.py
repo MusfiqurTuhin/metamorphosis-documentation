@@ -66,24 +66,46 @@ st.markdown(f"""
         box-shadow: 0 0 0 2px {SECONDARY_COLOR} !important;
     }}
     
-    /* Selectbox & Radio styling */
-    div[data-baseweb="select"] > div, div[data-baseweb="radio"] {{
-        border-radius: 8px !important;
+    /* --- DROPDOWN & RADIO STYLING (High Contrast) --- */
+    
+    /* Main Selectbox Container */
+    div[data-baseweb="select"] > div {{
         background-color: {WHITE} !important;
         border: 1px solid #E0E0E0 !important;
         color: {ACCENT_COLOR} !important;
+        border-radius: 8px !important;
     }}
-    /* Ensure dropdown options are visible */
-    div[data-baseweb="popover"] li {{
-        color: {ACCENT_COLOR} !important; 
-    }}
+    
+    /* Text inside the selectbox (Selected Value) */
     div[data-baseweb="select"] span {{
         color: {ACCENT_COLOR} !important;
     }}
     
-    /* Radio button text color */
+    /* The Dropdown Menu Popover */
+    div[data-baseweb="popover"], div[data-baseweb="menu"] {{
+        background-color: {WHITE} !important;
+        border: 1px solid #E0E0E0 !important;
+    }}
+    
+    /* Options inside the dropdown */
+    div[data-baseweb="menu"] li {{
+        background-color: {WHITE} !important;
+        color: {ACCENT_COLOR} !important;
+    }}
+    
+    /* Hover state for options */
+    div[data-baseweb="menu"] li:hover {{
+        background-color: {SECONDARY_COLOR} !important;
+        color: {PRIMARY_COLOR} !important;
+    }}
+
+    /* Radio Buttons */
+    div[role="radiogroup"] label {{
+        background-color: transparent !important;
+    }}
     div[role="radiogroup"] label p {{
         color: {ACCENT_COLOR} !important;
+        font-weight: 500 !important;
     }}
 
     /* --- BUTTONS --- */
