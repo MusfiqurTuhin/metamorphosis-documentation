@@ -9,31 +9,71 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- CUSTOM CSS FOR TIMES NEW ROMAN & PAPER LOOK ---
-st.markdown("""
+# --- BRAND COLORS ---
+# Derived from the Metamorphosis logo
+PRIMARY_COLOR = "#002F55"  # Dark Blue
+SECONDARY_COLOR = "#70D0C6" # Light Teal
+BACKGROUND_COLOR = "#FFFFFF" # White
+TEXT_COLOR = "#000000"       # Black
+
+# --- CUSTOM CSS FOR BRANDING & DOCUMENTS ---
+st.markdown(f"""
     <style>
-    /* Import Fonts if needed, but standard Times New Roman usually works natively */
+    /* --- General App Styling --- */
+    /* Main Title and Headers */
+    h1, h2, h3, h4, h5, h6, span[data-testid="stHeader"] {{
+        color: {PRIMARY_COLOR} !important;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+    }}
     
+    /* Sidebar Styling */
+    [data-testid="stSidebar"] {{
+        background-color: #f0f6f9 !important; /* A very light tint of the teal */
+        border-right: 2px solid {SECONDARY_COLOR};
+    }}
+    
+    /* Buttons */
+    div.stButton > button {{
+        background-color: {PRIMARY_COLOR} !important;
+        color: {BACKGROUND_COLOR} !important;
+        border: none !important;
+        border-radius: 5px !important;
+        padding: 0.5rem 1rem !important;
+        font-weight: bold !important;
+    }}
+    div.stButton > button:hover {{
+        background-color: {SECONDARY_COLOR} !important;
+        color: {PRIMARY_COLOR} !important;
+    }}
+
+    /* --- Document Content Styling (Times New Roman) --- */
     /* Target the main markdown output */
-    .stMarkdown, .stWrite, div[data-testid="stMarkdownContainer"] p {
+    .stMarkdown p, .stWrite p, div[data-testid="stMarkdownContainer"] p, 
+    .stMarkdown li, .stWrite li, div[data-testid="stMarkdownContainer"] li {{
         font-family: 'Times New Roman', Times, serif !important;
         font-size: 18px !important;
         line-height: 1.6 !important;
-        color: #000000 !important;
-    }
+        color: {TEXT_COLOR} !important;
+    }}
     
-    /* Headers in the document */
+    /* Headers within the generated document */
     div[data-testid="stMarkdownContainer"] h1, 
     div[data-testid="stMarkdownContainer"] h2, 
-    div[data-testid="stMarkdownContainer"] h3 {
+    div[data-testid="stMarkdownContainer"] h3 {{
         font-family: 'Times New Roman', Times, serif !important;
-        color: #2c3e50 !important;
-    }
+        color: {PRIMARY_COLOR} !important;
+        margin-top: 1.5em !important;
+    }}
 
-    /* Sidebar styling */
-    [data-testid="stSidebar"] {
-        background-color: #f0f2f6;
-    }
+    /* --- Mermaid Diagram Styling --- */
+    .mermaid {{
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 10px;
+        border: 1px solid #e0e0e0;
+        margin: 20px 0;
+        font-family: 'Times New Roman', Times, serif !important;
+    }}
     </style>
     """, unsafe_allow_html=True)
 
@@ -68,7 +108,18 @@ def get_system_instruction(doc_type):
     base_role = f"""
     ROLE: You are the Senior Solutions Architect and Lead Technical Writer for Metamorphosis Ltd.
     CONTEXT: {METAMORPHOSIS_CONTEXT}
-    TONE: Professional, Corporate, Industry-Standard, 'Times New Roman' formal style.
+    TONE: Professional, Corporate, Industry-Standard.
+    FORMATTING: 
+    - Use Markdown for structure.
+    - For any diagrams, charts, or flows, you MUST use a `mermaid` code block.
+    - Example:
+      ```mermaid
+      graph TD;
+          A-->B;
+          A-->C;
+          B-->D;
+          C-->D;
+      ```
     """
 
     if doc_type == "Proposal":
@@ -77,10 +128,10 @@ def get_system_instruction(doc_type):
         STRUCTURE:
         1. Executive Summary
         2. Understanding of Requirements (Pain Points)
-        3. Proposed Solution (Odoo Modules Mapping)
+        3. Proposed Solution (Odoo Modules Mapping) - **Include a high-level Mermaid flowchart of the proposed modules.**
         4. Metamorphosis Advantage (Why Us?)
         5. Relevant Case Studies
-        6. Implementation Methodology (The 6 Stages)
+        6. Implementation Methodology (The 6 Stages) - **Include a simple Mermaid Gantt chart for the timeline.**
         7. Investment & Timeline (Estimate)
         """
     
@@ -93,7 +144,7 @@ def get_system_instruction(doc_type):
         2. Business Objectives (SMART goals)
         3. Stakeholders Analysis
         4. In-Scope vs. Out-of-Scope
-        5. Current Process (As-Is) vs. Proposed Process (To-Be)
+        5. Current Process (As-Is) vs. Proposed Process (To-Be) - **Use two separate Mermaid flowcharts to illustrate these processes.**
         6. Business Risks
         """
 
@@ -104,9 +155,10 @@ def get_system_instruction(doc_type):
         STRUCTURE:
         1. Introduction
         2. Functional Requirements (Detailed Features, User Stories)
-        3. Non-Functional Requirements (Performance, Security, Reliability)
-        4. System Interfaces (Odoo API, External Hardware)
-        5. User Roles & Permissions
+        3. System Architecture - **Include a high-level Mermaid component diagram.**
+        4. Non-Functional Requirements (Performance, Security, Reliability)
+        5. System Interfaces (Odoo API, External Hardware)
+        6. User Roles & Permissions
         """
 
     elif doc_type == "TRD (Technical Req Doc)":
@@ -114,10 +166,10 @@ def get_system_instruction(doc_type):
         GOAL: Create a Technical Requirements Document (TRD).
         FOCUS: Technology stack, Odoo architecture, Server specs.
         STRUCTURE:
-        1. System Architecture (Odoo.sh / On-premise)
-        2. Database Design (PostgreSQL schema highlights)
+        1. System Architecture (Odoo.sh / On-premise) - **Include a detailed Mermaid deployment diagram.**
+        2. Database Design - **Include a Mermaid Entity-Relationship Diagram (ERD) for key modules.**
         3. Tech Stack (Python, XML, JS, PostgreSQL)
-        4. Integration Details (API Endpoints)
+        4. Integration Details (API Endpoints) - **Include a Mermaid sequence diagram for a key API interaction.**
         5. Security Protocols (SSL, Access Control)
         6. Server Specifications
         """
@@ -125,11 +177,11 @@ def get_system_instruction(doc_type):
     elif doc_type == "HLD (High-Level Design)":
         return base_role + """
         GOAL: Create a High-Level Design (HLD) document.
-        FOCUS: System modularity, data flow, and architectural diagrams (described in text).
+        FOCUS: System modularity, data flow, and architectural diagrams.
         STRUCTURE:
-        1. Architectural Overview
-        2. Component Diagram Description (Odoo Modules interaction)
-        3. Data Flow Diagrams (Description of flow from Sales -> Inventory -> Accounting)
+        1. Architectural Overview - **Include a Mermaid high-level system architecture diagram.**
+        2. Component Diagram - **Include a Mermaid diagram showing Odoo modules and their interactions.**
+        3. Data Flow Diagrams (DFD) - **Include a Mermaid flowchart illustrating the flow of data between major components (e.g., Sales -> Inventory -> Accounting).**
         4. Technology Dependencies
         5. Deployment Strategy
         """
@@ -141,7 +193,8 @@ def get_system_instruction(doc_type):
         STRUCTURE:
         1. Authentication (XML-RPC / JSON-RPC)
         2. Base URL & Environment
-        3. Endpoints (List specific endpoints relevant to the scenario)
+        3. Authentication Flow - **Include a Mermaid sequence diagram showing how to authenticate and get a session token.**
+        4. Endpoints (List specific endpoints relevant to the scenario)
            - Method (GET/POST)
            - Payload Params
            - Success Response (JSON)
@@ -156,9 +209,9 @@ def get_system_instruction(doc_type):
         1. Introduction & Testing Scope
         2. Test Environment Setup
         3. Roles & Responsibilities
-        4. Test Cases (Table format: ID, Scenario, Steps, Expected Result)
+        4. Testing Workflow - **Include a Mermaid flowchart of the defect reporting and resolution process.**
+        5. Test Cases (Table format: ID, Scenario, Steps, Expected Result)
            - Include cases for Sales, Purchase, Inventory, Accounting.
-        5. Defect Management Process
         6. Sign-off Criteria
         """
 
@@ -166,8 +219,9 @@ def get_system_instruction(doc_type):
 
 # --- SIDEBAR UI ---
 with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/2921/2921226.png", width=50) # Placeholder icon
-    st.title("Configuration")
+    # Use the primary color for the logo text
+    st.markdown(f"<h1 style='color: {PRIMARY_COLOR};'>Metamorphosis Architect</h1>", unsafe_allow_html=True)
+    st.markdown(f"<h3 style='color: {SECONDARY_COLOR};'>Configuration</h3>", unsafe_allow_html=True)
     
     api_key = st.text_input("🔑 Google Gemini API Key", type="password", help="Get this from Google AI Studio")
     
@@ -184,11 +238,12 @@ with st.sidebar:
         ]
     )
     
-    st.info(f"**Mode:** {doc_type}\n\nGenerates industry-standard docs tailored for Odoo Implementation.")
+    st.info(f"**Mode:** {doc_type}\n\nGenerates professional docs tailored for Odoo Implementation with Metamorphosis branding.")
 
 # --- MAIN UI ---
-st.title("🦋 Metamorphosis Document Architect")
-st.markdown("### Generate Professional ERP Documentation")
+# Use the primary color for the main title
+st.markdown(f"<h1 style='color: {PRIMARY_COLOR}; text-align: center;'>🦋 Metamorphosis Document Architect</h1>", unsafe_allow_html=True)
+st.markdown(f"<h3 style='color: {SECONDARY_COLOR}; text-align: center;'>Generate Professional ERP Documentation</h3>", unsafe_allow_html=True)
 
 client_scenario = st.text_area(
     "📝 Client Scenario / Requirements",
@@ -196,7 +251,11 @@ client_scenario = st.text_area(
     placeholder="Example: A textile manufacturing company in Narayanganj with 400 employees. They are facing issues with inventory tracking, wastage management, and syncing accounting with production. They need a full Odoo implementation."
 )
 
-generate_btn = st.button("🚀 Generate Document", type="primary")
+# Use a container to center the button
+with st.container():
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        generate_btn = st.button("🚀 Generate Document", type="primary", use_container_width=True)
 
 # --- GENERATION LOGIC ---
 if generate_btn:
@@ -211,7 +270,7 @@ if generate_btn:
             
             # Setup Model
             model = genai.GenerativeModel(
-                model_name="gemini-2.5-flash", # Updated to gemini-2.5-flash as requested
+                model_name="gemini-2.5-flash",
                 system_instruction=get_system_instruction(doc_type)
             )
 
@@ -226,28 +285,36 @@ if generate_btn:
             
             # Layout for title and content
             st.markdown("---")
-            st.markdown(f"## {doc_type} for Client")
-            st.markdown(doc_content)
+            st.markdown(f"<h2 style='color: {PRIMARY_COLOR};'>{doc_type} for Client</h2>", unsafe_allow_html=True)
+            
+            # Render the content with Mermaid diagrams
+            st.markdown(doc_content, unsafe_allow_html=True)
+            
             st.markdown("---")
 
             # Download Button
             timestamp = datetime.now().strftime("%Y%m%d_%H%M")
             filename = f"{doc_type.split()[0]}_Metamorphosis_{timestamp}.md"
             
-            st.download_button(
-                label="📥 Download Document (.md)",
-                data=doc_content,
-                file_name=filename,
-                mime="text/markdown"
-            )
+            # Use a container to center the download button
+            with st.container():
+                col1, col2, col3 = st.columns([1, 2, 1])
+                with col2:
+                    st.download_button(
+                        label="📥 Download Document (.md)",
+                        data=doc_content,
+                        file_name=filename,
+                        mime="text/markdown",
+                        use_container_width=True
+                    )
 
         except Exception as e:
             st.error(f"An error occurred: {e}")
 
 # --- FOOTER ---
 st.markdown(
-    """
-    <div style='position: fixed; bottom: 0; width: 100%; text-align: center; color: grey; font-size: 12px; padding: 10px;'>
+    f"""
+    <div style='position: fixed; bottom: 0; width: 100%; text-align: center; color: {PRIMARY_COLOR}; font-size: 12px; padding: 10px; background-color: {BACKGROUND_COLOR}; border-top: 1px solid #e0e0e0;'>
         Powered by Google Gemini 2.0 | Metamorphosis Systems Internal Tool
     </div>
     """, 
