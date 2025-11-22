@@ -211,7 +211,7 @@ if generate_btn:
             
             # Setup Model
             model = genai.GenerativeModel(
-                model_name="gemini-1.5-flash", # Efficient and fast for docs
+                model_name="gemini-2.5-flash", # Updated to gemini-2.5-flash as requested
                 system_instruction=get_system_instruction(doc_type)
             )
 
