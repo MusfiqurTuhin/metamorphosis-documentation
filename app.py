@@ -173,13 +173,18 @@ def get_system_instruction(doc_type):
     FORMATTING: 
     - Use Markdown for structure.
     - For any diagrams, charts, or flows, you MUST use a `mermaid` code block.
-    - Example:
+    
+    CRITICAL MERMAID SYNTAX RULES (STRICT):
+    1. ALWAYS use quotes for node labels. Example: `id["Label Text"]` NOT `id[Label Text]`.
+    2. NEVER use spaces or special characters in Node IDs. Example: `NodeA` NOT `Node A`.
+    3. Use `graph TD` for flowcharts and `sequenceDiagram` for interactions.
+    4. Do not use complex subgraphs if not necessary.
+    5. Example of Valid Syntax:
       ```mermaid
       graph TD;
-          A-->B;
-          A-->C;
-          B-->D;
-          C-->D;
+          Start["Start Process"] --> Decision{"Is Valid?"};
+          Decision -- Yes --> Process["Process Data"];
+          Decision -- No --> End["End Process"];
       ```
     """
 
@@ -189,7 +194,7 @@ def get_system_instruction(doc_type):
         STRUCTURE:
         1. Executive Summary
         2. Understanding of Requirements (Pain Points)
-        3. Proposed Solution (Odoo Modules Mapping) - **Include a high-level Mermaid flowchart of the proposed modules.**
+        3. Proposed Solution (Odoo Modules Mapping) - **Include a high-level Mermaid flowchart (graph TD) of the proposed modules.**
         4. Metamorphosis Advantage (Why Us?)
         5. Relevant Case Studies
         6. Implementation Methodology (The 6 Stages) - **Include a simple Mermaid Gantt chart for the timeline.**
@@ -205,7 +210,7 @@ def get_system_instruction(doc_type):
         2. Business Objectives (SMART goals)
         3. Stakeholders Analysis
         4. In-Scope vs. Out-of-Scope
-        5. Current Process (As-Is) vs. Proposed Process (To-Be) - **Use two separate Mermaid flowcharts to illustrate these processes.**
+        5. Current Process (As-Is) vs. Proposed Process (To-Be) - **Use two separate Mermaid flowcharts (graph TD) to illustrate these processes.**
         6. Business Risks
         """
 
@@ -216,7 +221,7 @@ def get_system_instruction(doc_type):
         STRUCTURE:
         1. Introduction
         2. Functional Requirements (Detailed Features, User Stories)
-        3. System Architecture - **Include a high-level Mermaid component diagram.**
+        3. System Architecture - **Include a high-level Mermaid component diagram (graph TD).**
         4. Non-Functional Requirements (Performance, Security, Reliability)
         5. System Interfaces (Odoo API, External Hardware)
         6. User Roles & Permissions
@@ -228,9 +233,9 @@ def get_system_instruction(doc_type):
         FOCUS: Technology stack, Odoo architecture, Server specs.
         STRUCTURE:
         1. System Architecture (Odoo.sh / On-premise) - **Include a detailed Mermaid deployment diagram.**
-        2. Database Design - **Include a Mermaid Entity-Relationship Diagram (ERD) for key modules.**
+        2. Database Design - **Include a Mermaid Entity-Relationship Diagram (ERD) for key modules (erDiagram).**
         3. Tech Stack (Python, XML, JS, PostgreSQL)
-        4. Integration Details (API Endpoints) - **Include a Mermaid sequence diagram for a key API interaction.**
+        4. Integration Details (API Endpoints) - **Include a Mermaid sequence diagram (sequenceDiagram) for a key API interaction.**
         5. Security Protocols (SSL, Access Control)
         6. Server Specifications
         """
@@ -254,7 +259,7 @@ def get_system_instruction(doc_type):
         STRUCTURE:
         1. Authentication (XML-RPC / JSON-RPC)
         2. Base URL & Environment
-        3. Authentication Flow - **Include a Mermaid sequence diagram showing how to authenticate and get a session token.**
+        3. Authentication Flow - **Include a Mermaid sequence diagram (sequenceDiagram) showing how to authenticate and get a session token.**
         4. Endpoints (List specific endpoints relevant to the scenario)
            - Method (GET/POST)
            - Payload Params
@@ -270,7 +275,7 @@ def get_system_instruction(doc_type):
         1. Introduction & Testing Scope
         2. Test Environment Setup
         3. Roles & Responsibilities
-        4. Testing Workflow - **Include a Mermaid flowchart of the defect reporting and resolution process.**
+        4. Testing Workflow - **Include a Mermaid flowchart (graph TD) of the defect reporting and resolution process.**
         5. Test Cases (Table format: ID, Scenario, Steps, Expected Result)
            - Include cases for Sales, Purchase, Inventory, Accounting.
         6. Sign-off Criteria
