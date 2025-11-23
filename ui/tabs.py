@@ -63,9 +63,14 @@ def _render_api_tab():
 def _render_prompt_refiner_tab():
     st.markdown("### ✨ Prompt Refiner")
     
-    template = st.selectbox("Template", ["None"] + list(st.session_state.get('PROMPT_TEMPLATES', {}).keys()), key="refiner_template")
-    if template != "None":
+    # Prompt templates may be empty; show dropdown only if available
+    prompt_templates = list(st.session_state.get('PROMPT_TEMPLATES', {}).keys())
+    if prompt_templates:
+        template = st.selectbox("Template", prompt_templates, key="refiner_template")
         st.info(st.session_state.PROMPT_TEMPLATES[template])
+    else:
+        template = None
+        st.info("No prompt templates available.")
     context = st.selectbox("Context", ["General", "Software Engineering", "Data Science", "Legal", "Medical", "Business", "Creative"], key="refiner_context")
     tone = st.select_slider("Tone", ["Casual", "Neutral", "Professional", "Academic"], key="refiner_tone")
     complexity = st.slider("Complexity", 1, 10, 7, key="refiner_complexity")
@@ -156,11 +161,17 @@ def _render_document_generator_tab():
 def _render_diagram_generator_tab():
     st.markdown("### 📊 Diagram Generator")
     
-    diagram_template = st.selectbox("Template", ["None"] + list(st.session_state.get('DIAGRAM_TEMPLATES', {}).keys()), key="diagram_template")
+    diagram_templates = list(st.session_state.get('DIAGRAM_TEMPLATES', {}).keys())
+    diagram_template = None
+    if diagram_templates:
+        diagram_template = st.selectbox("Template", diagram_templates, key="diagram_template")
+    else:
+        st.info("No diagram templates available. Add some in the settings!")
+
     diagram_theme = st.selectbox("Theme", ["default", "dark", "forest", "neutral"], key="diagram_theme")
     diagram_type = st.selectbox("Type", ["Flowchart", "Sequence", "ER Diagram", "Gantt", "Mindmap"], key="diagram_type")
     
-    base_code = st.session_state.DIAGRAM_TEMPLATES.get(diagram_template, "") if diagram_template != "None" else ""
+    base_code = st.session_state.DIAGRAM_TEMPLATES.get(diagram_template, "") if diagram_template else ""
     custom_code = st.text_area("Context", value=base_code, height=200, key="diagram_code")
     
     if st.button("🎨 Generate", type="primary"):
@@ -178,11 +189,14 @@ def _render_diagram_generator_tab():
     if "mermaid_code" in st.session_state:
         st.markdown("#### 👁️ Preview")
         # Show rendered diagram
-        png = helpers.get_mermaid_img(st.session_state.mermaid_code, "png")
-        if png:
-            st.image(png, caption="Generated Mermaid Diagram", use_column_width=True)
-        else:
-            st.error("Failed to render diagram. Please check your Mermaid syntax.")
+        try:
+            png = helpers.get_mermaid_img(st.session_state.mermaid_code, "png")
+            if png:
+                st.image(png, caption="Generated Mermaid Diagram", use_column_width=True)
+            else:
+                st.error("Failed to render diagram. Please check your Mermaid syntax or try again.")
+        except Exception as e:
+            st.error(f"An error occurred during diagram rendering: {e}. Please check your Mermaid syntax.")
         
         # Show code in expander
         with st.expander("📝 View Mermaid Code"):
@@ -213,8 +227,13 @@ def _render_diagram_generator_tab():
 def _render_code_generator_tab():
     st.markdown("### 💻 Code Generator")
     
-    language = st.selectbox("Language", ["Python", "JavaScript", "TypeScript", "Java", "C++", "Go"], key="code_lang")
-    framework = st.selectbox("Framework", ["None"] + list(st.session_state.get('CODE_FRAMEWORKS', {}).get(language, [])), key="code_framework")
+    language = st.selectbox("Language", ["Python", "JavaScript", "TypeScript", "Java", "C++", "Go", "C#", "Ruby", "PHP", "Swift", "Kotlin", "Rust", "Shell Script"], key="code_lang")
+    # Framework options may be empty for some languages; show dropdown only if options exist
+    framework_options = st.session_state.get('CODE_FRAMEWORKS', {}).get(language, [])
+    if framework_options:
+        framework = st.selectbox("Framework", ["None"] + framework_options, key="code_framework")
+    else:
+        framework = "None"
     style = st.selectbox("Style", ["OOP", "Functional", "Procedural"], key="code_style")
     show_advanced = st.checkbox("Show Advanced Options", key="code_advanced")
     if show_advanced:
@@ -311,7 +330,7 @@ def _render_translator_tab():
 def _render_email_writer_tab():
     st.markdown("### ✉️ Email Writer")
     
-    template = st.selectbox("Template", ["Meeting Request", "Follow-up", "Introduction"], key="email_template")
+    template = st.selectbox("Template", ["Meeting Request", "Follow-up", "Introduction", "Apology", "Thank You", "Sales Pitch", "Customer Support", "Announcement"], key="email_template")
     tone = st.select_slider("Tone", ["Casual", "Neutral", "Formal"], key="email_tone")
     length = st.select_slider("Length", ["Brief", "Standard", "Detailed"], key="email_length")
     subject = st.text_input("Subject", key="email_subject")
