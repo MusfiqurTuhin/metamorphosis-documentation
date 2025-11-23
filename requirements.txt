@@ -4,3 +4,6 @@ fpdf
 python-docx
 requests
 Pillow
+PyPDF2
+altair==5.1.2
+pyarrow==21.0.0
