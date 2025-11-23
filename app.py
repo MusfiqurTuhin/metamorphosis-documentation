@@ -352,12 +352,17 @@ st.markdown(f"""
 )
 
 # Header with logo
-col_logo, col_title = st.columns([1, 6])
-with col_logo:
-    st.image("https://www.metamorphosis.com.bd/web/image/website/1/logo/Metamorphosis?unique=1d24751", width=100)
-with col_title:
-    st.title("Metamorphosis Studio")
-    st.caption("🚀 Advanced AI-Powered Documentation & Development Suite")
+# Header with logo - Centered
+st.markdown(
+    """
+    <div style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 2rem;">
+        <img src="https://www.metamorphosis.com.bd/web/image/website/1/logo/Metamorphosis?unique=1d24751" width="180" style="margin-bottom: 1rem;">
+        <h1 style="margin: 0; font-size: 3rem; background: linear-gradient(135deg, #FF5A36 0%, #FF8C42 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Metamorphosis Studio</h1>
+        <p style="font-size: 1.2rem; color: #CCCCCC; margin-top: 0.5rem;">🚀 Advanced AI-Powered Documentation & Development Suite</p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 st.markdown("---")
 

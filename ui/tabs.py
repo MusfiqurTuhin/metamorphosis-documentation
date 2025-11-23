@@ -64,13 +64,13 @@ def _render_prompt_refiner_tab():
     st.markdown("### ✨ Prompt Refiner")
     col1, col2 = st.columns(2)
     with col1:
-        template = st.selectbox("Template", ["None"] + list(st.session_state.get('PROMPT_TEMPLATES', {}).keys()))
+        template = st.selectbox("Template", ["None"] + list(st.session_state.get('PROMPT_TEMPLATES', {}).keys()), key="refiner_template")
         if template != "None":
             st.info(st.session_state.PROMPT_TEMPLATES[template])
-        context = st.selectbox("Context", ["General", "Software Engineering", "Data Science", "Legal", "Medical", "Business", "Creative"])
-        tone = st.select_slider("Tone", ["Casual", "Neutral", "Professional", "Academic"])
-        complexity = st.slider("Complexity", 1, 10, 7)
-        prompt_input = st.text_area("Prompt", height=200)
+        context = st.selectbox("Context", ["General", "Software Engineering", "Data Science", "Legal", "Medical", "Business", "Creative"], key="refiner_context")
+        tone = st.select_slider("Tone", ["Casual", "Neutral", "Professional", "Academic"], key="refiner_tone")
+        complexity = st.slider("Complexity", 1, 10, 7, key="refiner_complexity")
+        prompt_input = st.text_area("Prompt", height=200, key="refiner_prompt")
     with col2:
         if st.button("🚀 Refine", type="primary"):
             if prompt_input:
@@ -96,13 +96,13 @@ def _render_document_generator_tab():
     st.caption("Generate professional documents like BRDs, TDDs, and Manuals. Upload context files for better accuracy.")
     col1, col2 = st.columns([1, 2])
     with col1:
-        doc_type = st.selectbox("Type", ["BRD", "TDD", "API Spec", "User Manual", "SOP", "Report", "Other"])
-        doc_style = st.selectbox("Style", ["Professional", "Academic", "Technical", "Simple"])
-        include_toc = st.checkbox("Include Table of Contents", value=True)
-        include_meta = st.checkbox("Include Metadata")
+        doc_type = st.selectbox("Type", ["BRD", "TDD", "API Spec", "User Manual", "SOP", "Report", "Other"], key="doc_type")
+        doc_style = st.selectbox("Style", ["Professional", "Academic", "Technical", "Simple"], key="doc_style")
+        include_toc = st.checkbox("Include Table of Contents", value=True, key="doc_toc")
+        include_meta = st.checkbox("Include Metadata", key="doc_meta")
         if include_meta:
-            author = st.text_input("Author")
-            version = st.text_input("Version", "1.0")
+            author = st.text_input("Author", key="doc_author")
+            version = st.text_input("Version", "1.0", key="doc_version")
         # Context file upload
         st.markdown("#### 📤 Upload Context File (Optional)")
         uploaded_file = st.file_uploader(
@@ -150,11 +150,11 @@ def _render_diagram_generator_tab():
     st.markdown("### 📊 Diagram Generator")
     col1, col2 = st.columns([1, 2])
     with col1:
-        diagram_template = st.selectbox("Template", ["None"] + list(st.session_state.get('DIAGRAM_TEMPLATES', {}).keys()))
-        diagram_theme = st.selectbox("Theme", ["default", "dark", "forest", "neutral"])
-        diagram_type = st.selectbox("Type", ["Flowchart", "Sequence", "ER Diagram", "Gantt", "Mindmap"])
+        diagram_template = st.selectbox("Template", ["None"] + list(st.session_state.get('DIAGRAM_TEMPLATES', {}).keys()), key="diagram_template")
+        diagram_theme = st.selectbox("Theme", ["default", "dark", "forest", "neutral"], key="diagram_theme")
+        diagram_type = st.selectbox("Type", ["Flowchart", "Sequence", "ER Diagram", "Gantt", "Mindmap"], key="diagram_type")
         base_code = st.session_state.DIAGRAM_TEMPLATES.get(diagram_template, "") if diagram_template != "None" else ""
-        custom_code = st.text_area("Custom Mermaid Code", value=base_code, height=200)
+        custom_code = st.text_area("Custom Mermaid Code", value=base_code, height=200, key="diagram_code")
     with col2:
         if st.button("🎨 Generate", type="primary"):
             client = GeminiClient(st.session_state.get("api_key"))
@@ -198,15 +198,15 @@ def _render_code_generator_tab():
     st.markdown("### 💻 Code Generator")
     col1, col2 = st.columns([1, 2])
     with col1:
-        language = st.selectbox("Language", ["Python", "JavaScript", "TypeScript", "Java", "C++", "Go"])
-        framework = st.selectbox("Framework", ["None"] + list(st.session_state.get('CODE_FRAMEWORKS', {}).get(language, [])))
-        style = st.selectbox("Style", ["OOP", "Functional", "Procedural"])
-        show_advanced = st.checkbox("Show Advanced Options")
+        language = st.selectbox("Language", ["Python", "JavaScript", "TypeScript", "Java", "C++", "Go"], key="code_lang")
+        framework = st.selectbox("Framework", ["None"] + list(st.session_state.get('CODE_FRAMEWORKS', {}).get(language, [])), key="code_framework")
+        style = st.selectbox("Style", ["OOP", "Functional", "Procedural"], key="code_style")
+        show_advanced = st.checkbox("Show Advanced Options", key="code_advanced")
         if show_advanced:
-            include_docs = st.checkbox("Include Documentation", True)
-            include_types = st.checkbox("Include Type Hints", True)
-            include_tests = st.checkbox("Generate Unit Tests")
-        code_req = st.text_area("Requirements", height=250)
+            include_docs = st.checkbox("Include Documentation", True, key="code_docs")
+            include_types = st.checkbox("Include Type Hints", True, key="code_types")
+            include_tests = st.checkbox("Generate Unit Tests", key="code_tests_check")
+        code_req = st.text_area("Requirements", height=250, key="code_req")
     with col2:
         if st.button("⚡ Generate", type="primary"):
             client = GeminiClient(st.session_state.get("api_key"))
@@ -242,13 +242,13 @@ def _render_summarizer_tab():
     st.markdown("### 📚 Summarizer")
     col1, col2 = st.columns(2)
     with col1:
-        compression = st.slider("Compression Ratio", 10, 90, 50)
-        format_type = st.selectbox("Format", ["Paragraph", "Bullet Points", "Key Points"])
-        show_advanced = st.checkbox("Show Advanced Options")
+        compression = st.slider("Compression Ratio", 10, 90, 50, key="sum_compression")
+        format_type = st.selectbox("Format", ["Paragraph", "Bullet Points", "Key Points"], key="sum_format")
+        show_advanced = st.checkbox("Show Advanced Options", key="sum_advanced")
         if show_advanced:
-            extract_info = st.multiselect("Extract", ["Names", "Dates", "Numbers", "Locations"])
-            multilingual = st.checkbox("Multi‑language Support")
-        text = st.text_area("Text to Summarize", height=350)
+            extract_info = st.multiselect("Extract", ["Names", "Dates", "Numbers", "Locations"], key="sum_extract")
+            multilingual = st.checkbox("Multi‑language Support", key="sum_multi")
+        text = st.text_area("Text to Summarize", height=350, key="sum_text")
     with col2:
         if st.button("🔍 Summarize", type="primary"):
             client = GeminiClient(st.session_state.get("api_key"))
@@ -270,12 +270,12 @@ def _render_translator_tab():
     st.markdown("### 🌐 Translator")
     col1, col2 = st.columns(2)
     with col1:
-        target_lang = st.selectbox("Target Language", ["Spanish", "French", "German", "Chinese", "Japanese", "Korean", "Arabic", "Hindi", "Bengali", "Portuguese", "Russian", "Italian"])
-        show_advanced = st.checkbox("Show Advanced Options")
+        target_lang = st.selectbox("Target Language", ["Spanish", "French", "German", "Chinese", "Japanese", "Korean", "Arabic", "Hindi", "Bengali", "Portuguese", "Russian", "Italian"], key="trans_lang")
+        show_advanced = st.checkbox("Show Advanced Options", key="trans_advanced")
         if show_advanced:
-            formality = st.select_slider("Formality", ["Casual", "Neutral", "Formal"])
-            preserve_format = st.checkbox("Preserve Formatting", True)
-        text = st.text_area("Text to Translate", height=300)
+            formality = st.select_slider("Formality", ["Casual", "Neutral", "Formal"], key="trans_formality")
+            preserve_format = st.checkbox("Preserve Formatting", True, key="trans_format")
+        text = st.text_area("Text to Translate", height=300, key="trans_text")
     with col2:
         if st.button("🚀 Translate", type="primary"):
             client = GeminiClient(st.session_state.get("api_key"))
@@ -299,11 +299,11 @@ def _render_email_writer_tab():
     st.markdown("### ✉️ Email Writer")
     col1, col2 = st.columns(2)
     with col1:
-        template = st.selectbox("Template", ["Meeting Request", "Follow-up", "Introduction"])
-        tone = st.select_slider("Tone", ["Casual", "Neutral", "Formal"])
-        length = st.select_slider("Length", ["Brief", "Standard", "Detailed"])
-        subject = st.text_input("Subject")
-        body = st.text_area("Email Body", height=250)
+        template = st.selectbox("Template", ["Meeting Request", "Follow-up", "Introduction"], key="email_template")
+        tone = st.select_slider("Tone", ["Casual", "Neutral", "Formal"], key="email_tone")
+        length = st.select_slider("Length", ["Brief", "Standard", "Detailed"], key="email_length")
+        subject = st.text_input("Subject", key="email_subject")
+        body = st.text_area("Email Body", height=250, key="email_body")
     with col2:
         if st.button("✉️ Generate", type="primary"):
             client = GeminiClient(st.session_state.get("api_key"))
@@ -325,12 +325,12 @@ def _render_analyzer_tab():
     st.markdown("### 🔍 Content Analyzer")
     col1, col2 = st.columns(2)
     with col1:
-        show_advanced = st.checkbox("Show Advanced Options")
+        show_advanced = st.checkbox("Show Advanced Options", key="analyze_advanced")
         if show_advanced:
-            depth = st.select_slider("Analysis Depth", ["Quick", "Standard", "Comprehensive"])
-            grammar = st.checkbox("Grammar Check")
-            seo = st.checkbox("SEO Analysis")
-        text = st.text_area("Content to Analyze", height=400)
+            depth = st.select_slider("Analysis Depth", ["Quick", "Standard", "Comprehensive"], key="analyze_depth")
+            grammar = st.checkbox("Grammar Check", key="analyze_grammar")
+            seo = st.checkbox("SEO Analysis", key="analyze_seo")
+        text = st.text_area("Content to Analyze", height=400, key="analyze_text")
     with col2:
         if st.button("🔍 Analyze", type="primary"):
             client = GeminiClient(st.session_state.get("api_key"))
@@ -357,15 +357,15 @@ def _render_quiz_generator_tab():
     st.markdown("### 📝 Quiz Generator")
     col1, col2 = st.columns(2)
     with col1:
-        q_type = st.selectbox("Type", ["MCQ", "True/False", "Short Answer", "Mixed"])
-        num_q = st.slider("Number of Questions", 5, 30, 10)
-        difficulty = st.select_slider("Difficulty", ["Easy", "Medium", "Hard"])
-        show_advanced = st.checkbox("Show Advanced Options")
+        q_type = st.selectbox("Type", ["MCQ", "True/False", "Short Answer", "Mixed"], key="quiz_type")
+        num_q = st.slider("Number of Questions", 5, 30, 10, key="quiz_num")
+        difficulty = st.select_slider("Difficulty", ["Easy", "Medium", "Hard"], key="quiz_diff")
+        show_advanced = st.checkbox("Show Advanced Options", key="quiz_advanced")
         if show_advanced:
-            include_answers = st.checkbox("Include Answer Key", True)
-            randomize = st.checkbox("Randomize Order")
-            points = st.number_input("Points per Question", 1, 10, 1)
-        topic = st.text_area("Topic/Content", height=250)
+            include_answers = st.checkbox("Include Answer Key", True, key="quiz_answers")
+            randomize = st.checkbox("Randomize Order", key="quiz_random")
+            points = st.number_input("Points per Question", 1, 10, 1, key="quiz_points")
+        topic = st.text_area("Topic/Content", height=250, key="quiz_topic")
     with col2:
         if st.button("🎯 Generate", type="primary"):
             client = GeminiClient(st.session_state.get("api_key"))
