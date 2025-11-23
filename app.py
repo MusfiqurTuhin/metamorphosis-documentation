@@ -31,17 +31,17 @@ if 'user_prefs' not in st.session_state:
         'show_advanced': False
     }
 
-# --- THEME CONFIGURATION ---
+# --- THEME CONFIGURATION (Brand Colors) ---
 THEME = {
-    "primary": "#6366F1",
-    "primary_dark": "#4F46E5",
-    "accent": "#06B6D4",
-    "success": "#10B981",
-    "bg": "#F8FAFC",
-    "surface": "#FFFFFF",
-    "text_main": "#0F172A",
-    "text_secondary": "#64748B",
-    "border": "#E2E8F0",
+    "primary": "#FF5A36",        # Vermilion/Action Orange
+    "primary_dark": "#E64A19",   # Darker Orange for hover
+    "accent": "#FF7A5C",         # Lighter Orange
+    "success": "#10B981",        # Emerald-500 (keep for success states)
+    "bg": "#E5E6DA",             # Warm Linen - main background
+    "surface": "#FFFFFF",        # White - cards and surfaces
+    "text_main": "#000000",      # Black - primary text
+    "text_secondary": "#4A4A4A", # Dark Gray - secondary text
+    "border": "#D0D1C6",         # Slightly darker linen for borders
     "shadow": "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
     "shadow_lg": "0 10px 15px -3px rgba(0, 0, 0, 0.1)"
 }
@@ -181,7 +181,7 @@ st.markdown(f"""
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&family=Tiro+Bangla:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap');
 
     .stApp {{
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, {THEME['bg']} 0%, #D4D5CA 100%);
         font-family: 'Inter', sans-serif;
     }}
     
