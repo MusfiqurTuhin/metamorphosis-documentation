@@ -3,3 +3,4 @@ google-generativeai
 fpdf
 python-docx
 requests
+Pillow
