@@ -211,17 +211,32 @@ def generate_mermaid_link(mermaid_code):
     return f"https://mermaid.live/edit#{base64_str}"
 
 def get_mermaid_img(code, format="png"):
-    """Fetches the diagram image from mermaid.ink"""
-    state = {"code": code, "mermaid": {"theme": "default"}}
+    """Fetches the diagram image from mermaid.ink using compressed encoding."""
+    state = {
+        "code": code,
+        "mermaid": {"theme": "default"},
+        "autoSync": True,
+        "updateDiagram": True
+    }
     json_str = json.dumps(state)
-    base64_str = base64.urlsafe_b64encode(json_str.encode('utf-8')).decode('utf-8')
-    url = f"https://mermaid.ink/img/{base64_str}"
+    # Use zlib compression (same as mermaid.live) to handle large diagrams
+    compressor = zlib.compressobj(9, zlib.DEFLATED, -15, 8, zlib.Z_DEFAULT_STRATEGY)
+    compressed = compressor.compress(json_str.encode('utf-8')) + compressor.flush()
+    base64_str = base64.urlsafe_b64encode(compressed).decode('utf-8')
+    
+    url = f"https://mermaid.ink/img/pako:{base64_str}"
     if format == "svg":
-        url = f"https://mermaid.ink/svg/{base64_str}"
+        url = f"https://mermaid.ink/svg/pako:{base64_str}"
     
     try:
         response = requests.get(url)
         if response.status_code == 200:
+            # Verify it's actually an image
+            content_type = response.headers.get('Content-Type', '')
+            if format == "png" and "image/png" not in content_type:
+                return None
+            if format == "svg" and "image/svg" not in content_type:
+                return None
             return response.content
     except:
         return None
@@ -236,13 +251,27 @@ def create_pdf(text, image_bytes=None):
     # Add Image if provided
     if image_bytes:
         import tempfile
+        import os
+        
+        # Create a temp file
         with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp:
             tmp.write(image_bytes)
             tmp_path = tmp.name
         
-        # Center image roughly
-        pdf.image(tmp_path, x=10, w=190)
-        pdf.ln(10)
+        try:
+            # Center image roughly
+            # A4 width is 210mm. Margins are usually 10mm.
+            # We use 190mm width.
+            pdf.image(tmp_path, x=10, w=190)
+            pdf.ln(10)
+        except Exception as e:
+            pdf.set_text_color(255, 0, 0)
+            pdf.cell(0, 10, f"Error embedding image: {str(e)}", ln=True)
+            pdf.set_text_color(0, 0, 0)
+        finally:
+            # Cleanup temp file
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
     
     # Add Text
     # FPDF doesn't handle markdown or utf-8 perfectly out of the box, 
