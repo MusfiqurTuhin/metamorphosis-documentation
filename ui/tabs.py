@@ -178,7 +178,11 @@ def _render_diagram_generator_tab():
         if "⚠️" in res or "❌" in res:
             st.markdown(res)
         else:
-            st.session_state.mermaid_code = helpers.sanitize_mermaid_code(res)
+            # Clean up common title syntax issues (replace 'title:' with 'title')
+            clean_code = res.replace("title:", "title")
+            # Additional whitespace normalization (collapse multiple spaces after graph keyword)
+            clean_code = clean_code.replace("graph TD    ", "graph TD ")
+            st.session_state.mermaid_code = helpers.sanitize_mermaid_code(clean_code)
             helpers.add_to_history(st, "Diagrams", st.session_state.mermaid_code, diagram_type)
             st.success("✅ Diagram generated!")
 
