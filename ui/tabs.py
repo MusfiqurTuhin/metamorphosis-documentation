@@ -135,8 +135,13 @@ def _render_document_generator_tab():
                 helpers.add_to_history(st, "Documents", st.session_state.doc_content, doc_type)
                 st.success("✅ Document generated!")
 
-    # ----- Download / Export Section -----
+    # ----- Preview Section -----
     if "doc_content" in st.session_state:
+        st.markdown("#### 📄 Document Preview")
+        st.markdown(st.session_state.doc_content)
+        
+        # ----- Download / Export Section -----
+        st.markdown("---")
         st.markdown("#### 📥 Downloads & Export")
         dl1, dl2, dl3 = st.columns(3)
         with dl1:
@@ -170,12 +175,21 @@ def _render_diagram_generator_tab():
 
     if "mermaid_code" in st.session_state:
         st.markdown("#### 👁️ Preview")
-        st.markdown(st.session_state.mermaid_code)
+        # Show rendered diagram
+        png = helpers.get_mermaid_img(st.session_state.mermaid_code, "png")
+        if png:
+            st.image(png, caption="Generated Mermaid Diagram", use_column_width=True)
+        else:
+            st.error("Failed to render diagram. Please check your Mermaid syntax.")
+        
+        # Show code in expander
+        with st.expander("📝 View Mermaid Code"):
+            st.code(st.session_state.mermaid_code, language="mermaid")
+        
         # Download options
         st.markdown("#### 💾 Downloads")
         dl1, dl2, dl3 = st.columns(3)
         with dl1:
-            png = helpers.get_mermaid_img(st.session_state.mermaid_code, "png")
             if png:
                 st.download_button("PNG", png, "diagram.png", use_container_width=True)
         with dl2:
