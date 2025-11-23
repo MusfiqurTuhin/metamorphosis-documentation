@@ -10,133 +10,143 @@ st.set_page_config(
     page_title="Metamorphosis Architect",
     page_icon="🦋",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
-# --- THEME CONFIGURATION ---
+# --- THEME CONFIGURATION (Clean SaaS) ---
 THEME = {
-    "primary": "#F97316",  # Vibrant Orange
-    "primary_gradient": "linear-gradient(135deg, #F97316 0%, #FB923C 100%)",
-    "secondary": "#FFF7ED", # Orange-50
-    "bg": "#F8FAFC",        # Slate-50
-    "surface": "#FFFFFF",
-    "text": "#1E293B",      # Slate-800
-    "text_light": "#64748B", # Slate-500
-    "border": "#E2E8F0",    # Slate-200
-    "glass": "rgba(255, 255, 255, 0.9)",
-    "glass_shadow": "0 8px 32px 0 rgba(31, 38, 135, 0.07)"
+    "primary": "#EA580C",       # Orange-600 (High contrast, professional)
+    "primary_hover": "#C2410C", # Orange-700
+    "bg": "#FFFFFF",            # Pure White
+    "secondary_bg": "#F8FAFC",  # Slate-50 (Subtle contrast)
+    "text_main": "#0F172A",     # Slate-900 (Sharp text)
+    "text_secondary": "#475569",# Slate-600 (Softer text)
+    "border": "#E2E8F0",        # Slate-200
+    "success": "#10B981",       # Emerald-500
+    "error": "#EF4444",         # Red-500
 }
 
 # --- CUSTOM CSS ---
 st.markdown(f"""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap');
 
-    /* BASE STYLES */
+    /* BASE RESET & TYPOGRAPHY */
     .stApp {{
         background-color: {THEME['bg']};
-        font-family: 'Outfit', sans-serif;
-        color: {THEME['text']};
+        font-family: 'Inter', sans-serif;
+        color: {THEME['text_main']};
     }}
     
     h1, h2, h3, h4, h5, h6 {{
-        font-family: 'Outfit', sans-serif !important;
+        font-family: 'Inter', sans-serif !important;
         font-weight: 700;
-        letter-spacing: -0.02em;
-        color: {THEME['text']};
+        letter-spacing: -0.025em;
+        color: {THEME['text_main']};
     }}
     
-    code, pre, .stCodeBlock {{
-        font-family: 'JetBrains Mono', monospace !important;
+    p, li, label, .stMarkdown {{
+        color: {THEME['text_secondary']};
+        font-size: 1rem;
+        line-height: 1.6;
     }}
 
-    /* SIDEBAR */
-    [data-testid="stSidebar"] {{
-        background-color: {THEME['surface']} !important;
-        border-right: 1px solid {THEME['border']};
+    /* TOP NAVIGATION (TABS) */
+    .stTabs [data-baseweb="tab-list"] {{
+        gap: 2rem;
+        border-bottom: 1px solid {THEME['border']};
+        padding-bottom: 0.5rem;
     }}
     
-    /* NAVIGATION STYLING */
-    .nav-header {{
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: {THEME['text_light']};
-        margin-top: 2rem;
-        margin-bottom: 0.5rem;
-        font-weight: 600;
+    .stTabs [data-baseweb="tab"] {{
+        height: 3rem;
+        white-space: nowrap;
+        background-color: transparent;
+        border: none;
+        color: {THEME['text_secondary']};
+        font-weight: 500;
+        font-size: 1rem;
+    }}
+    
+    .stTabs [aria-selected="true"] {{
+        color: {THEME['primary']} !important;
+        border-bottom: 2px solid {THEME['primary']} !important;
     }}
 
     /* CARDS & CONTAINERS */
-    .glass-card {{
-        background: {THEME['glass']};
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
+    .feature-card {{
+        background-color: {THEME['bg']};
         border: 1px solid {THEME['border']};
-        border-radius: 20px;
-        padding: 2rem;
-        box-shadow: {THEME['glass_shadow']};
-        margin-bottom: 1.5rem;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        transition: box-shadow 0.2s ease;
+        height: 100%;
     }}
-    .glass-card:hover {{
-        transform: translateY(-2px);
-        box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.1);
+    .feature-card:hover {{
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+    }}
+
+    /* INPUTS */
+    .stTextArea textarea, .stTextInput input, .stSelectbox div[data-baseweb="select"] {{
+        border: 1px solid {THEME['border']} !important;
+        border-radius: 8px !important;
+        padding: 0.75rem !important;
+        background-color: {THEME['bg']} !important;
+        color: {THEME['text_main']} !important;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+    }}
+    .stTextArea textarea:focus, .stTextInput input:focus {{
+        border-color: {THEME['primary']} !important;
+        box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.2) !important; /* Orange ring */
     }}
 
     /* BUTTONS */
     div.stButton > button {{
-        background: {THEME['primary_gradient']} !important;
+        background-color: {THEME['primary']} !important;
         color: white !important;
         border: none !important;
-        border-radius: 12px !important;
-        padding: 0.75rem 1.5rem !important;
+        border-radius: 8px !important;
+        padding: 0.6rem 1.25rem !important;
         font-weight: 600 !important;
-        box-shadow: 0 4px 12px rgba(249, 115, 22, 0.25) !important;
-        transition: all 0.2s ease !important;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
+        transition: background-color 0.15s ease !important;
     }}
     div.stButton > button:hover {{
-        transform: translateY(-1px);
-        box-shadow: 0 8px 20px rgba(249, 115, 22, 0.35) !important;
-    }}
-    div.stButton > button:active {{
-        transform: translateY(0);
+        background-color: {THEME['primary_hover']} !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
     }}
 
-    /* SECONDARY BUTTONS */
+    /* SECONDARY BUTTONS (Outline) */
     button[kind="secondary"] {{
-        background: white !important;
-        color: {THEME['primary']} !important;
-        border: 1px solid {THEME['primary']} !important;
-    }}
-
-    /* INPUTS */
-    .stTextArea textarea, .stTextInput input {{
+        background-color: white !important;
+        color: {THEME['text_main']} !important;
         border: 1px solid {THEME['border']} !important;
-        border-radius: 12px !important;
-        padding: 1rem !important;
-        background: white !important;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02) !important;
-        transition: border-color 0.2s ease;
-    }}
-    .stTextArea textarea:focus, .stTextInput input:focus {{
-        border-color: {THEME['primary']} !important;
-        box-shadow: 0 0 0 3px {THEME['secondary']} !important;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
     }}
 
-    /* ALERTS */
-    div[data-baseweb="notification"] {{
-        border-radius: 12px !important;
+    /* HEADER */
+    .app-header {{
+        display: flex;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid {THEME['border']};
     }}
-    
-    /* CUSTOM HERO */
-    .hero-title {{
-        background: {THEME['primary_gradient']};
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-size: 3rem;
-        font-weight: 800;
-        margin-bottom: 0.5rem;
+    .logo {{
+        font-size: 2rem;
+        margin-right: 1rem;
+    }}
+    .app-title {{
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: {THEME['text_main']};
+        margin: 0;
+    }}
+    .app-subtitle {{
+        font-size: 0.875rem;
+        color: {THEME['text_secondary']};
+        margin: 0;
     }}
     </style>
 """, unsafe_allow_html=True)
@@ -158,27 +168,15 @@ def generate_mermaid_link(mermaid_code):
     return f"https://mermaid.live/edit#{base64_str}"
 
 def validate_mermaid_code(code):
-    """
-    Strictly validates Mermaid code against common syntax errors.
-    Returns (is_valid, error_message)
-    """
-    # 1. Check for unquoted labels with special characters
-    # Pattern: id[Label with spaces] -> Bad
-    # Pattern: id["Label with spaces"] -> Good
-    
-    # This regex looks for node definitions like A[Content] where Content contains spaces/special chars but isn't quoted
-    # It's a heuristic, not a full parser.
+    """Strictly validates Mermaid code against common syntax errors."""
     lines = code.split('\n')
     for i, line in enumerate(lines):
-        # Check for node IDs that are not alphanumeric (e.g., "Node A")
-        # Matches "Node A[" or "Node-A["
+        # Check for node IDs that are not alphanumeric
         bad_id_match = re.search(r'^(\s*)([a-zA-Z0-9_]*[^a-zA-Z0-9_\s\[]+[a-zA-Z0-9_]*)\s*\[', line)
         if bad_id_match:
              return False, f"Line {i+1}: Node ID '{bad_id_match.group(2)}' contains invalid characters. Use alphanumeric and underscores only."
 
         # Check for unquoted labels
-        # Look for [text] where text has spaces and no quotes
-        # This is tricky, but we can check if it starts with "
         label_match = re.search(r'\[(.*?)\]', line)
         if label_match:
             content = label_match.group(1)
@@ -197,188 +195,141 @@ def sanitize_mermaid_code(raw_text):
         code = raw_text.replace("```mermaid", "").replace("```", "").strip()
     return code
 
-# --- SIDEBAR NAVIGATION ---
-with st.sidebar:
-    st.markdown(f"""
-        <div style="text-align: center; padding: 2rem 0;">
-            <div style="font-size: 3rem; margin-bottom: 0.5rem;">🦋</div>
-            <h3 style="margin:0; font-size: 1.25rem;">Metamorphosis</h3>
-            <p style="font-size: 0.8rem; color: {THEME['text_light']};">Architect Suite v3.0</p>
+# --- HEADER ---
+st.markdown(f"""
+    <div class="app-header">
+        <div class="logo">🦋</div>
+        <div>
+            <h1 class="app-title">Metamorphosis Architect</h1>
+            <p class="app-subtitle">Professional ERP Documentation Suite</p>
         </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown('<p class="nav-header">Workspace</p>', unsafe_allow_html=True)
-    
-    # Custom Radio Styling via CSS is hard, so we use standard radio but clean
-    selected_page = st.radio(
-        "Navigate",
-        ["Home", "Prompt Rewriter", "Diagram Architect", "Document Scribe"],
-        label_visibility="collapsed"
-    )
+    </div>
+""", unsafe_allow_html=True)
+
+# --- SIDEBAR (SETTINGS ONLY) ---
+with st.sidebar:
+    st.markdown("### ⚙️ Settings")
+    api_key = st.text_input("Gemini API Key", type="password", help="Required for AI features")
+    if not api_key:
+        st.warning("⚠️ Please enter your API Key to use the tools.")
     
     st.markdown("---")
-    st.markdown('<p class="nav-header">Settings</p>', unsafe_allow_html=True)
-    api_key = st.text_input("Gemini API Key", type="password", help="Required for AI features")
-    
-    if not api_key:
-        st.warning("⚠️ API Key missing")
-
-# --- PAGE: HOME ---
-if selected_page == "Home":
     st.markdown(f"""
-        <div style="text-align: center; padding: 4rem 0;">
-            <h1 class="hero-title">Welcome to the Architect</h1>
-            <p style="font-size: 1.25rem; color: {THEME['text_light']}; max-width: 600px; margin: 0 auto;">
-                The all-in-one suite for Metamorphosis Systems to design, document, and visualize ERP solutions with precision.
-            </p>
+        <div style="font-size: 0.75rem; color: {THEME['text_secondary']};">
+            v3.1.0 (Human-Centric Build)<br>
+            © Metamorphosis Systems
         </div>
     """, unsafe_allow_html=True)
+
+# --- TOP NAVIGATION ---
+tab_home, tab_rewriter, tab_diagram, tab_docs = st.tabs([
+    "🏠 Dashboard", 
+    "✨ Prompt Rewriter", 
+    "📊 Diagram Architect", 
+    "📝 Document Scribe"
+])
+
+# --- TAB: DASHBOARD ---
+with tab_home:
+    st.markdown("### Welcome Back")
+    st.markdown("Select a tool from the tabs above to get started.")
     
     col1, col2, col3 = st.columns(3)
     
     with col1:
         st.markdown(f"""
-            <div class="glass-card" style="height: 100%;">
-                <h3>✨ Prompt Rewriter</h3>
-                <p style="color: {THEME['text_light']};">Turn messy thoughts into precise, engineer-grade prompts for maximum AI accuracy.</p>
+            <div class="feature-card">
+                <h4>✨ Prompt Rewriter</h4>
+                <p>Turn vague ideas into precise, engineer-grade prompts. Essential for getting the best results from AI.</p>
             </div>
         """, unsafe_allow_html=True)
         
     with col2:
         st.markdown(f"""
-            <div class="glass-card" style="height: 100%;">
-                <h3>📊 Diagram Architect</h3>
-                <p style="color: {THEME['text_light']};">Generate error-free Mermaid.js diagrams. Strict syntax enforcement ensures compatibility.</p>
+            <div class="feature-card">
+                <h4>📊 Diagram Architect</h4>
+                <p>Create strict, error-free Mermaid.js diagrams. Visualizes flows, sequences, and ERDs instantly.</p>
             </div>
         """, unsafe_allow_html=True)
         
     with col3:
         st.markdown(f"""
-            <div class="glass-card" style="height: 100%;">
-                <h3>📝 Document Scribe</h3>
-                <p style="color: {THEME['text_light']};">Draft comprehensive BRDs, SRSs, and Technical Specs in seconds.</p>
+            <div class="feature-card">
+                <h4>📝 Document Scribe</h4>
+                <p>Draft comprehensive technical documentation (BRD, SRS, API Specs) with professional formatting.</p>
             </div>
         """, unsafe_allow_html=True)
 
-# --- PAGE: PROMPT REWRITER ---
-elif selected_page == "Prompt Rewriter":
-    st.markdown("## ✨ Prompt Rewriter")
-    st.markdown("Transform vague ideas into high-fidelity prompts for the Architect or Scribe.")
+# --- TAB: PROMPT REWRITER ---
+with tab_rewriter:
+    st.markdown("### ✨ Prompt Rewriter")
+    st.markdown("Optimize your request before generating diagrams or documents.")
     
-    col_input, col_output = st.columns([1, 1])
+    col_rw_1, col_rw_2 = st.columns([1, 1])
     
-    with col_input:
-        st.markdown("### 📥 Messy Input")
-        raw_prompt = st.text_area("Dump your thoughts here...", height=300, placeholder="e.g., i need a login flow for odoo where user forgets password and gets email...")
+    with col_rw_1:
+        raw_prompt = st.text_area("Your Draft Idea", height=250, placeholder="e.g., I need a sales flow for Odoo where the manager approves orders over $500...")
         
-        if st.button("Rewrite & Optimize", type="primary"):
+        if st.button("Optimize Prompt", type="primary", use_container_width=True):
             if not api_key:
-                st.error("Please provide an API Key in the sidebar.")
+                st.error("API Key required.")
             elif not raw_prompt:
-                st.warning("Please enter some text to rewrite.")
+                st.warning("Please enter a draft.")
             else:
                 try:
                     genai.configure(api_key=api_key)
                     model = genai.GenerativeModel("gemini-2.5-flash")
-                    
-                    system_prompt = """
-                    ROLE: Expert Prompt Engineer for ERP Systems.
-                    GOAL: Rewrite the user's raw input into a structured, highly detailed prompt optimized for LLM generation.
-                    
-                    OUTPUT FORMAT:
-                    1. **Optimized Prompt**: The exact text the user should copy.
-                    2. **Explanation**: Brief bullet points on what was improved.
-                    
-                    RULES:
-                    - Add missing technical context (Odoo specific modules, standard ERP flows).
-                    - Use clear sections (Objective, Actors, Steps, Constraints).
-                    - Tone: Professional and Technical.
-                    """
-                    
-                    with st.spinner("Analyzing and restructuring..."):
-                        response = model.generate_content(f"{system_prompt}\n\nUSER INPUT: {raw_prompt}")
+                    system_prompt = "ROLE: Expert Prompt Engineer. GOAL: Rewrite user input into a structured, detailed prompt for an ERP Architect AI. OUTPUT: Only the optimized prompt."
+                    with st.spinner("Refining..."):
+                        response = model.generate_content(f"{system_prompt}\n\nINPUT: {raw_prompt}")
                         st.session_state.rewritten_result = response.text
                 except Exception as e:
                     st.error(f"Error: {e}")
 
-    with col_output:
-        st.markdown("### 📤 Optimized Result")
+    with col_rw_2:
+        st.markdown("#### Optimized Result")
         if "rewritten_result" in st.session_state:
-            st.markdown(f"""
-                <div class="glass-card">
-                    {st.session_state.rewritten_result}
-                </div>
-            """, unsafe_allow_html=True)
+            st.text_area("Copy this:", value=st.session_state.rewritten_result, height=250)
         else:
-            st.info("The optimized prompt will appear here.")
+            st.info("Your optimized prompt will appear here.")
 
-# --- PAGE: DIAGRAM ARCHITECT ---
-elif selected_page == "Diagram Architect":
-    st.markdown("## 📊 Diagram Architect")
-    st.markdown("Generate strict, error-free Mermaid.js diagrams.")
+# --- TAB: DIAGRAM ARCHITECT ---
+with tab_diagram:
+    st.markdown("### 📊 Diagram Architect")
     
-    diagram_type = st.selectbox("Diagram Type", ["Flowchart (TD)", "Sequence Diagram", "ER Diagram", "State Diagram", "Gantt Chart"])
+    col_d_input, col_d_preview = st.columns([1, 2])
     
-    diagram_prompt = st.text_area("Diagram Requirements (Paste optimized prompt here)", height=150)
-    
-    if st.button("Generate Diagram", type="primary"):
-        if not api_key:
-            st.error("Please provide an API Key.")
-        else:
-            try:
-                genai.configure(api_key=api_key)
-                
-                # STRICT SYSTEM PROMPT
-                system_instruction = f"""
-                ROLE: Senior Solutions Architect.
-                GOAL: Generate a valid Mermaid.js {diagram_type} code block.
-                
-                *** CRITICAL SYNTAX RULES (STRICT ENFORCEMENT) ***
-                1. **NODE IDs**: MUST be alphanumeric + underscores ONLY. NO spaces, hyphens, or special chars.
-                   - BAD: `Node A`, `user-login`
-                   - GOOD: `NodeA`, `User_Login`
-                2. **LABELS**: MUST be double-quoted if they contain spaces or special chars.
-                   - BAD: `A[User Login]`
-                   - GOOD: `A["User Login"]`
-                3. **DIRECTION**: Use `graph TD` for flowcharts.
-                4. **OUTPUT**: ONLY the code block. No text before or after.
-                """
-                
-                model = genai.GenerativeModel("gemini-2.5-flash", system_instruction=system_instruction)
-                
-                with st.spinner("Architecting..."):
-                    response = model.generate_content(f"REQUIREMENTS: {diagram_prompt}")
-                    clean_code = sanitize_mermaid_code(response.text)
-                    
-                    # Validate
-                    is_valid, msg = validate_mermaid_code(clean_code)
-                    
-                    if is_valid:
-                        st.session_state.generated_mermaid = clean_code
-                        st.success("Generation Successful & Validated!")
-                    else:
-                        st.session_state.generated_mermaid = clean_code
-                        st.warning(f"⚠️ Potential Syntax Issue Detected: {msg}")
+    with col_d_input:
+        diagram_type = st.selectbox("Diagram Type", ["Flowchart (TD)", "Sequence Diagram", "ER Diagram", "State Diagram", "Gantt Chart"])
+        diagram_prompt = st.text_area("Diagram Requirements", height=200, placeholder="Paste your optimized prompt here...")
+        
+        if st.button("Generate Diagram", type="primary", use_container_width=True):
+            if not api_key:
+                st.error("API Key required.")
+            else:
+                try:
+                    genai.configure(api_key=api_key)
+                    system_instruction = f"""
+                    ROLE: Senior Solutions Architect. GOAL: Generate valid Mermaid.js {diagram_type}.
+                    RULES: 1. Alphanumeric IDs only (No spaces). 2. Double-quote all labels. 3. Output only code.
+                    """
+                    model = genai.GenerativeModel("gemini-2.5-flash", system_instruction=system_instruction)
+                    with st.spinner("Architecting..."):
+                        response = model.generate_content(f"REQUIREMENTS: {diagram_prompt}")
+                        clean_code = sanitize_mermaid_code(response.text)
+                        is_valid, msg = validate_mermaid_code(clean_code)
                         
-            except Exception as e:
-                st.error(f"Error: {e}")
+                        st.session_state.generated_mermaid = clean_code
+                        if not is_valid:
+                            st.warning(f"⚠️ Syntax Warning: {msg}")
+                        else:
+                            st.success("Generated successfully.")
+                except Exception as e:
+                    st.error(f"Error: {e}")
 
-    if "generated_mermaid" in st.session_state:
-        st.markdown("### Preview")
-        
-        col_preview, col_code = st.columns([2, 1])
-        
-        with col_preview:
-            st.markdown(f"""
-                <div class="glass-card" style="text-align: center; background: white;">
-                    <br>
-                    <pre class="mermaid">
-{st.session_state.generated_mermaid}
-                    </pre>
-                </div>
-            """, unsafe_allow_html=True)
-            
-            # Load Mermaid JS
+    with col_d_preview:
+        if "generated_mermaid" in st.session_state:
+            st.markdown("#### Preview")
             st.components.v1.html(
                 f"""
                 <script type="module">
@@ -389,33 +340,30 @@ elif selected_page == "Diagram Architect":
                     {st.session_state.generated_mermaid}
                 </div>
                 """,
-                height=500,
+                height=400,
                 scrolling=True
             )
-
-        with col_code:
-            st.markdown("### Source Code")
-            st.code(st.session_state.generated_mermaid, language="mermaid")
+            
+            with st.expander("View Code"):
+                st.code(st.session_state.generated_mermaid, language="mermaid")
             
             live_url = generate_mermaid_link(st.session_state.generated_mermaid)
-            st.link_button("🚀 Open in Mermaid.live", live_url, use_container_width=True)
+            st.link_button("Open in Mermaid.live", live_url)
 
-# --- PAGE: DOCUMENT SCRIBE ---
-elif selected_page == "Document Scribe":
-    st.markdown("## 📝 Document Scribe")
-    st.markdown("Generate professional documentation.")
+# --- TAB: DOCUMENT SCRIBE ---
+with tab_docs:
+    st.markdown("### 📝 Document Scribe")
     
-    doc_type = st.selectbox("Document Type", ["Business Requirement Doc (BRD)", "Technical Design Doc (TDD)", "API Specification", "User Manual"])
-    doc_prompt = st.text_area("Project Details", height=200)
+    doc_type = st.selectbox("Document Type", ["Business Requirement Doc (BRD)", "Technical Design Doc (TDD)", "API Specification"])
+    doc_prompt = st.text_area("Project Details", height=150, placeholder="Describe the module or feature...")
     
     if st.button("Draft Document", type="primary"):
         if not api_key:
-            st.error("Please provide an API Key.")
+            st.error("API Key required.")
         else:
             try:
                 genai.configure(api_key=api_key)
                 model = genai.GenerativeModel("gemini-2.5-flash")
-                
                 with st.spinner("Writing..."):
                     response = model.generate_content(f"Write a professional {doc_type} for: {doc_prompt}. Use Markdown.")
                     st.session_state.generated_doc = response.text
@@ -424,11 +372,7 @@ elif selected_page == "Document Scribe":
 
     if "generated_doc" in st.session_state:
         st.markdown("---")
-        st.download_button("📥 Download Markdown", st.session_state.generated_doc, "document.md")
-        st.markdown(f"""
-            <div class="glass-card" style="background: white;">
-                {st.session_state.generated_doc}
-            </div>
-        """, unsafe_allow_html=True)
+        st.download_button("Download Markdown", st.session_state.generated_doc, "document.md")
+        st.markdown(st.session_state.generated_doc)
 
 
