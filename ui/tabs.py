@@ -174,30 +174,28 @@ def _render_diagram_generator_tab():
         client = GeminiClient(st.session_state.get("api_key"))
         sys_prompt = f"You are a Mermaid diagram expert. Generate syntactically perfect Mermaid code for a {diagram_type}."
         res = client.generate_content(f"{sys_prompt}\n{custom_code}")
-        
         if "⚠️" in res or "❌" in res:
-            st.markdown(res)
+            # Attempt a fix using a secondary AI call
+            fix_prompt = f"Please correct any Mermaid syntax errors in the following code and return only the corrected code:\n{res}"
+            fix_res = client.generate_content(fix_prompt)
+            if "⚠️" in fix_res or "❌" in fix_res:
+                st.error("Failed to generate a valid diagram. Please edit the code manually.")
+                st.code(res, language="mermaid")
+            else:
+                clean_code = fix_res.replace("title:", "title").replace("graph TD    ", "graph TD ")
+                st.session_state.mermaid_code = helpers.sanitize_mermaid_code(clean_code)
+                helpers.add_to_history(st, "Diagrams", st.session_state.mermaid_code, diagram_type)
+                st.success("✅ Diagram generated after auto‑fix!")
+                st.code(st.session_state.mermaid_code, language="mermaid")
         else:
-            # Clean up common title syntax issues (replace 'title:' with 'title')
-            clean_code = res.replace("title:", "title")
-            # Additional whitespace normalization (collapse multiple spaces after graph keyword)
-            clean_code = clean_code.replace("graph TD    ", "graph TD ")
+            clean_code = res.replace("title:", "title").replace("graph TD    ", "graph TD ")
             st.session_state.mermaid_code = helpers.sanitize_mermaid_code(clean_code)
             helpers.add_to_history(st, "Diagrams", st.session_state.mermaid_code, diagram_type)
             st.success("✅ Diagram generated!")
-
-    if "mermaid_code" in st.session_state:
-        st.markdown("#### 👁️ Preview")
-        # Show rendered diagram
-        try:
-            png = helpers.get_mermaid_img(st.session_state.mermaid_code, "png")
-            if png:
-                st.image(png, caption="Generated Mermaid Diagram", use_column_width=True)
-            else:
-                st.error("Failed to render diagram. Please check your Mermaid syntax or try again.")
-        except Exception as e:
-            st.error(f"An error occurred during diagram rendering: {e}. Please check your Mermaid syntax.")
-        
+            st.code(st.session_state.mermaid_code, language="mermaid")
+        # Provide copyable text area and external editor links
+        st.text_area("Copy Mermaid Code", st.session_state.mermaid_code, height=200)
+        st.markdown("**Render your diagram**: [Mermaid Live Editor](https://mermaid.live) | [Mermaid JS Docs](https://mermaid-js.github.io/mermaid/#/edit) | [Kroki.io](https://kroki.io)" )        
         # Show code in expander
         with st.expander("📝 View Mermaid Code"):
             st.code(st.session_state.mermaid_code, language="mermaid")
