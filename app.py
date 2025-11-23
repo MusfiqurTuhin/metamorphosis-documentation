@@ -881,82 +881,59 @@ with tabs[3]:
             with dl3:
                 st.download_button("📥 PDF", create_pdf(st.session_state.doc_content), "document.pdf", "application/pdf", use_container_width=True)
             
-            # Automated Google Docs export with clipboard
-            st.markdown("#### 📄 Export to Google Docs (Automated)")
+            # Google Docs Export - Simplified
+            st.markdown("#### 📄 Export to Google Docs")
             
-            # Escape content for JavaScript
-            import json
-            escaped_content = json.dumps(st.session_state.doc_content)
+            col1, col2 = st.columns([2, 1])
             
-            # One-click automated export
-            st.components.v1.html(
-                f"""
-                <style>
-                    .gdocs-export-btn {{
+            with col1:
+                # Show content in copyable text area
+                st.text_area(
+                    "Step 1: Select All (Ctrl+A) and Copy (Ctrl+C):", 
+                    st.session_state.doc_content, 
+                    height=120,
+                    key="gdocs_export_area",
+                    help="Select all text in this box and copy it"
+                )
+            
+            with col2:
+                st.markdown("<br>", unsafe_allow_html=True)
+                # Button to open Google Docs
+                st.markdown("""
+                <a href="https://docs.google.com/document/create" target="_blank">
+                    <button style="
                         width: 100%;
-                        padding: 1rem;
+                        padding: 1.25rem;
                         background: linear-gradient(135deg, #4285F4 0%, #34A853 100%);
                         color: white;
                         border: none;
                         border-radius: 12px;
                         font-weight: 600;
-                        font-size: 1rem;
+                        font-size: 1.1rem;
                         cursor: pointer;
+                        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
                         transition: all 0.3s ease;
-                        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-                    }}
-                    .gdocs-export-btn:hover {{
-                        transform: translateY(-2px);
-                        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-                    }}
-                    .success-message {{
-                        margin-top: 1rem;
-                        padding: 0.75rem;
-                        background: #D4EDDA;
-                        border: 1px solid #C3E6CB;
-                        border-radius: 8px;
-                        color: #155724;
-                        display: none;
-                    }}
-                </style>
-                
-                <button class="gdocs-export-btn" onclick="exportToGoogleDocs()">
-                    🚀 One-Click Export to Google Docs
-                </button>
-                <div id="success-msg" class="success-message">
-                    ✅ Content copied! Google Docs opening... Paste with Ctrl+V or Cmd+V
-                </div>
-                
-                <script>
-                    async function exportToGoogleDocs() {{
-                        const content = {escaped_content};
-                        
-                        try {{
-                            // Copy to clipboard
-                            await navigator.clipboard.writeText(content);
-                            
-                            // Show success message
-                            document.getElementById('success-msg').style.display = 'block';
-                            
-                            // Open Google Docs in new tab after a brief delay
-                            setTimeout(() => {{
-                                window.open('https://docs.google.com/document/create', '_blank');
-                            }}, 500);
-                            
-                        }} catch (err) {{
-                            alert('Failed to copy. Please use the manual copy option below.');
-                            console.error('Copy failed:', err);
-                        }}
-                    }}
-                </script>
-                """,
-                height=120
-            )
+                    " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(0,0,0,0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.2)';">
+                        📄 Step 2: Open Google Docs
+                    </button>
+                </a>
+                <p style="font-size: 0.85rem; color: #666; margin-top: 0.75rem; text-align: center;">
+                    Then paste (Ctrl+V or Cmd+V)
+                </p>
+                """, unsafe_allow_html=True)
             
-            # Fallback manual copy option
-            with st.expander("📋 Manual Copy (if auto-copy doesn't work)"):
-                st.text_area("Copy this content:", st.session_state.doc_content, height=150, key="manual_copy_area")
-                st.caption("Select all (Ctrl+A), copy (Ctrl+C), then paste in Google Docs")
+            st.info("💡 **Quick tip**: After copying, the Google Docs button opens a new document where you can paste immediately!")
+            
+            # Alternative: Download as TXT for easy import
+            st.markdown("#### 📥 Alternative: Download as Text")
+            st.download_button(
+                "📄 Download as TXT (for Google Docs import)",
+                st.session_state.doc_content,
+                "document.txt",
+                "text/plain",
+                help="Download and then use File > Open in Google Docs",
+                use_container_width=True
+            )
 
 # === TAB 5: CODE GENERATOR ===
 with tabs[4]:
