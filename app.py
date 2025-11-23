@@ -402,9 +402,37 @@ st.markdown(f"""
         color: {THEME['text_main']} !important;
     }}
     
-    /* Fix download buttons */
+    /* Fix download buttons - COMPREHENSIVE */
     .stDownloadButton > button {{
         background-color: {THEME['text_main']} !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 12px !important;
+        padding: 0.75rem 1.5rem !important;
+        font-weight: 600 !important;
+        transition: all 0.3s ease !important;
+    }}
+    
+    .stDownloadButton > button:hover {{
+        background-color: {THEME['primary']} !important;
+        color: white !important;
+    }}
+    
+    .stDownloadButton > button > div {{
+        color: white !important;
+    }}
+    
+    .stDownloadButton > button span {{
+        color: white !important;
+    }}
+    
+    /* Ensure download button text is always white */
+    button[kind="secondary"] {{
+        background-color: {THEME['text_main']} !important;
+        color: white !important;
+    }}
+    
+    button[kind="secondary"] * {{
         color: white !important;
     }}
     
@@ -659,10 +687,35 @@ with tabs[2]:
                 try:
                     genai.configure(api_key=st.session_state.api_key)
                     model = genai.GenerativeModel("gemini-2.5-flash")
-                    sys_prompt = f"Generate Mermaid {diagram_type}. Quote labels. Code only."
-                    res = model.generate_content(f"{sys_prompt}\n{reqs}")
+                    
+                    # Comprehensive Mermaid syntax prompt
+                    sys_prompt = f"""You are a Mermaid diagram expert. Generate SYNTACTICALLY PERFECT Mermaid code for {diagram_type}.
+
+CRITICAL RULES:
+1. Declaration: Start with correct diagram type (flowchart TD, sequenceDiagram, classDiagram, etc.)
+2. Node IDs: Use alphanumeric only, no special chars, DON'T start with 'o' or 'x'
+3. Labels: ALWAYS quote labels with spaces or special chars: id["Label Text"]
+4. Arrows: Use correct syntax for diagram type (-->, ->, -.>, etc.)
+5. Never use lowercase "end" as node label - use "End" or "END"
+6. Escape special chars: & → &amp;, < → &lt;
+7. Close all blocks: subgraph, loop, alt must end with 'end'
+8. A4-Compatible: Keep diagram hierarchical and not too wide (max 5-6 nodes horizontally)
+
+DIAGRAM-SPECIFIC RULES:
+- Flowchart: Use flowchart TD/LR, shapes A[Box], B(Rounded), C{{Diamond}}, D[(Database)]
+- Sequence: Define participants first, use A->>B: message, activate/deactivate
+- Class: Use classDiagram, define classes with attributes/methods, relationships <|--
+- ER: Use erDiagram, ENTITY ||--o{{ RELATION syntax
+- Gantt: dateFormat YYYY-MM-DD, section headers, task :id, start, duration
+- State: Use stateDiagram-v2, [*] for start/end
+- Pie: pie title "Title", "Label" : value
+
+OUTPUT: Only valid Mermaid code wrapped in ```mermaid``` block. No explanations."""
+
+                    res = model.generate_content(f"{sys_prompt}\n\nREQUIREMENTS:\n{reqs}")
                     st.session_state.mermaid_code = sanitize_mermaid_code(res.text)
                     add_to_history("Diagrams", st.session_state.mermaid_code, diagram_type)
+                    st.success("✅ Diagram generated with syntax validation!")
                 except Exception as e:
                     st.error(f"❌ {e}")
     
@@ -671,13 +724,47 @@ with tabs[2]:
             st.markdown("#### 👁️ Preview")
             st.components.v1.html(
                 f"""
+                <style>
+                    .mermaid-container {{
+                        width: 100%;
+                        max-width: 794px; /* A4 width in pixels at 96 DPI */
+                        margin: 0 auto;
+                        padding: 20px;
+                        background: white;
+                        border-radius: 12px;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    }}
+                    .mermaid {{
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        min-height: 300px;
+                    }}
+                </style>
                 <script type="module">
                     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-                    mermaid.initialize({{ startOnLoad: true, theme: '{diagram_theme}' }});
+                    mermaid.initialize({{ 
+                        startOnLoad: true, 
+                        theme: '{diagram_theme}',
+                        flowchart: {{ 
+                            useMaxWidth: true,
+                            htmlLabels: true,
+                            curve: 'basis'
+                        }},
+                        sequence: {{
+                            useMaxWidth: true
+                        }},
+                        gantt: {{
+                            useMaxWidth: true
+                        }}
+                    }});
                 </script>
-                <div class="mermaid">{st.session_state.mermaid_code}</div>
+                <div class="mermaid-container">
+                    <div class="mermaid">{st.session_state.mermaid_code}</div>
+                </div>
                 """,
-                height=500
+                height=600,
+                scrolling=True
             )
             
             # Downloads
