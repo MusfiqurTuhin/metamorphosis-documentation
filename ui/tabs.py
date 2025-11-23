@@ -200,6 +200,8 @@ def _render_diagram_generator_tab():
         with st.expander("📝 View Mermaid Code"):
             st.code(st.session_state.mermaid_code, language="mermaid")
         
+        # Generate PNG for download
+        png = helpers.get_mermaid_img(st.session_state.mermaid_code, "png")
         # Download options
         st.markdown("#### 💾 Downloads")
         dl1, dl2, dl3 = st.columns(3)
