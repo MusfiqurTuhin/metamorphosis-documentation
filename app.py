@@ -4,6 +4,10 @@ import re
 import json
 import base64
 import zlib
+import requests
+from fpdf import FPDF
+from docx import Document
+import io
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(
@@ -13,21 +17,25 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- THEME CONFIGURATION (Standard Modern - Indigo/Slate) ---
+# --- THEME CONFIGURATION (Deep Ocean / Neo-SaaS) ---
 THEME = {
-    "primary": "#4F46E5",       # Indigo-600
+    "primary": "#4F46E5",       # Electric Indigo
     "primary_hover": "#4338CA", # Indigo-700
-    "bg": "#F3F4F6",            # Gray-100 (App Background)
-    "surface": "#FFFFFF",       # White (Card Background)
-    "text_main": "#111827",     # Gray-900
-    "text_secondary": "#6B7280",# Gray-500
-    "border": "#E5E7EB",        # Gray-200
+    "accent": "#0EA5E9",        # Sky-500
+    "bg": "#F8FAFC",            # Cultured (Slate-50)
+    "surface": "#FFFFFF",       # Pure White
+    "text_main": "#0F172A",     # Slate-900
+    "text_secondary": "#64748B",# Slate-500
+    "border": "#E2E8F0",        # Slate-200
+    "shadow_sm": "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+    "shadow_md": "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+    "shadow_lg": "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)"
 }
 
 # --- CUSTOM CSS ---
 st.markdown(f"""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
     /* BASE RESET */
     .stApp {{
@@ -36,104 +44,152 @@ st.markdown(f"""
         color: {THEME['text_main']};
     }}
     
+    /* TYPOGRAPHY */
     h1, h2, h3, h4, h5, h6 {{
         font-family: 'Inter', sans-serif !important;
         font-weight: 600;
-        letter-spacing: -0.01em;
+        letter-spacing: -0.02em;
         color: {THEME['text_main']};
     }}
     
     p, li, label, .stMarkdown {{
         color: {THEME['text_secondary']};
         font-size: 0.95rem;
-        line-height: 1.5;
+        line-height: 1.6;
+    }}
+    
+    code {{
+        font-family: 'JetBrains Mono', monospace !important;
+        font-size: 0.85rem;
     }}
 
-    /* HEADER NAVIGATION */
+    /* CENTRALIZED LAYOUT CONTAINER */
+    .block-container {{
+        max-width: 1000px !important;
+        padding-top: 2rem !important;
+        padding-bottom: 4rem !important;
+    }}
+
+    /* NAVIGATION (PILL STYLE) */
     .stTabs [data-baseweb="tab-list"] {{
-        gap: 2rem;
+        gap: 0.5rem;
         background-color: {THEME['surface']};
-        padding: 1rem 2rem;
-        border-radius: 12px;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-        margin-bottom: 2rem;
+        padding: 0.5rem;
+        border-radius: 9999px; /* Pill shape */
+        box-shadow: {THEME['shadow_sm']};
+        border: 1px solid {THEME['border']};
+        margin-bottom: 3rem;
+        display: inline-flex;
+        width: auto;
+        margin-left: auto;
+        margin-right: auto;
     }}
     
     .stTabs [data-baseweb="tab"] {{
         height: 2.5rem;
-        white-space: nowrap;
+        padding: 0 1.5rem;
+        border-radius: 9999px;
         background-color: transparent;
         border: none;
         color: {THEME['text_secondary']};
         font-weight: 500;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
     }}
     
     .stTabs [aria-selected="true"] {{
-        color: {THEME['primary']} !important;
-        font-weight: 600;
-        border-bottom: 2px solid {THEME['primary']} !important;
+        background-color: {THEME['primary']} !important;
+        color: white !important;
+        box-shadow: {THEME['shadow_sm']};
     }}
 
-    /* CARDS */
+    /* CARDS (NEO-SAAS) */
     .feature-card {{
         background-color: {THEME['surface']};
-        border: 1px solid {THEME['border']};
-        border-radius: 8px;
-        padding: 1.5rem;
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        border: 1px solid transparent;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: {THEME['shadow_md']};
+        transition: all 0.3s ease;
         height: 100%;
     }}
+    .feature-card:hover {{
+        transform: translateY(-2px);
+        box-shadow: {THEME['shadow_lg']};
+        border-color: {THEME['border']};
+    }}
 
-    /* INPUTS */
+    /* INPUTS (FOCUS GLOW) */
     .stTextArea textarea, .stTextInput input, .stSelectbox div[data-baseweb="select"] {{
         border: 1px solid {THEME['border']} !important;
-        border-radius: 6px !important;
-        padding: 0.75rem !important;
+        border-radius: 10px !important;
+        padding: 0.85rem !important;
         background-color: {THEME['surface']} !important;
         color: {THEME['text_main']} !important;
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+        box-shadow: {THEME['shadow_sm']} !important;
+        transition: all 0.2s ease;
     }}
     .stTextArea textarea:focus, .stTextInput input:focus {{
         border-color: {THEME['primary']} !important;
-        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important; /* Indigo ring */
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15) !important; /* Indigo Glow */
     }}
 
-    /* BUTTONS */
+    /* BUTTONS (TACTILE) */
     div.stButton > button {{
-        background-color: {THEME['primary']} !important;
+        background: linear-gradient(180deg, {THEME['primary']} 0%, {THEME['primary_hover']} 100%) !important;
         color: white !important;
-        border: none !important;
-        border-radius: 6px !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        border-radius: 8px !important;
         padding: 0.6rem 1.25rem !important;
         font-weight: 500 !important;
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
-        transition: background-color 0.15s ease !important;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1), inset 0 1px 0 0 rgba(255,255,255,0.1) !important;
+        transition: transform 0.1s ease !important;
     }}
     div.stButton > button:hover {{
-        background-color: {THEME['primary_hover']} !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3) !important;
+    }}
+    div.stButton > button:active {{
+        transform: translateY(0);
     }}
 
-    /* APP HEADER */
+    /* HEADER */
     .app-header {{
-        display: flex;
-        align-items: center;
-        margin-bottom: 1.5rem;
+        text-align: center;
+        margin-bottom: 1rem;
     }}
     .logo {{
-        font-size: 1.5rem;
-        margin-right: 0.75rem;
-        background: {THEME['surface']};
-        padding: 0.5rem;
-        border-radius: 8px;
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-        border: 1px solid {THEME['border']};
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+        display: inline-block;
+        background: linear-gradient(135deg, {THEME['primary']} 0%, {THEME['accent']} 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }}
     .app-title {{
-        font-size: 1.25rem;
-        font-weight: 600;
+        font-size: 2rem;
+        font-weight: 700;
         color: {THEME['text_main']};
         margin: 0;
+        letter-spacing: -0.03em;
+    }}
+    .app-subtitle {{
+        font-size: 1rem;
+        color: {THEME['text_secondary']};
+        margin-top: 0.5rem;
+    }}
+    
+    /* CHIPS / TAGS */
+    .chip {{
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        background-color: {THEME['bg']};
+        border: 1px solid {THEME['border']};
+        color: {THEME['text_secondary']};
+        font-size: 0.75rem;
+        font-weight: 500;
+        margin-right: 0.5rem;
     }}
     </style>
 """, unsafe_allow_html=True)
@@ -153,6 +209,59 @@ def generate_mermaid_link(mermaid_code):
     compressed = compressor.compress(json_str.encode('utf-8')) + compressor.flush()
     base64_str = base64.urlsafe_b64encode(compressed).decode('utf-8')
     return f"https://mermaid.live/edit#{base64_str}"
+
+def get_mermaid_img(code, format="png"):
+    """Fetches the diagram image from mermaid.ink"""
+    state = {"code": code, "mermaid": {"theme": "default"}}
+    json_str = json.dumps(state)
+    base64_str = base64.urlsafe_b64encode(json_str.encode('utf-8')).decode('utf-8')
+    url = f"https://mermaid.ink/img/{base64_str}"
+    if format == "svg":
+        url = f"https://mermaid.ink/svg/{base64_str}"
+    
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            return response.content
+    except:
+        return None
+    return None
+
+def create_pdf(text, image_bytes=None):
+    """Creates a PDF with text and optional image."""
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    
+    # Add Image if provided
+    if image_bytes:
+        import tempfile
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp:
+            tmp.write(image_bytes)
+            tmp_path = tmp.name
+        
+        # Center image roughly
+        pdf.image(tmp_path, x=10, w=190)
+        pdf.ln(10)
+    
+    # Add Text
+    # FPDF doesn't handle markdown or utf-8 perfectly out of the box, 
+    # so we do a basic latin-1 encode/replace to prevent crashes.
+    clean_text = text.encode('latin-1', 'replace').decode('latin-1')
+    pdf.multi_cell(0, 10, clean_text)
+    
+    return pdf.output(dest='S').encode('latin-1')
+
+def create_docx(text):
+    """Creates a DOCX file from text."""
+    doc = Document()
+    for line in text.split('\n'):
+        doc.add_paragraph(line)
+    
+    buffer = io.BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+    return buffer.getvalue()
 
 def validate_mermaid_code(code):
     """Strictly validates Mermaid code against common syntax errors."""
@@ -182,9 +291,8 @@ def sanitize_mermaid_code(raw_text):
 st.markdown(f"""
     <div class="app-header">
         <div class="logo">🦋</div>
-        <div>
-            <h1 class="app-title">Metamorphosis Architect</h1>
-        </div>
+        <h1 class="app-title">Metamorphosis Architect</h1>
+        <p class="app-subtitle">Precision Tools for Digital Transformation</p>
     </div>
 """, unsafe_allow_html=True)
 
@@ -195,7 +303,7 @@ with st.sidebar:
     if not api_key:
         st.warning("⚠️ API Key missing")
     st.markdown("---")
-    st.caption("v4.0.0 (Standard Modern)")
+    st.caption("v5.1.0 (Enhanced Downloads)")
 
 # --- TOP NAVIGATION ---
 tab_home, tab_rewriter, tab_diagram, tab_docs = st.tabs([
@@ -207,45 +315,47 @@ tab_home, tab_rewriter, tab_diagram, tab_docs = st.tabs([
 
 # --- TAB: DASHBOARD ---
 with tab_home:
-    st.markdown("### Dashboard")
-    st.markdown("Select a tool to begin.")
+    st.markdown("<br>", unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns(3)
     
     with col1:
         st.markdown(f"""
             <div class="feature-card">
-                <h4>✨ Prompt Refiner</h4>
-                <p>General-purpose prompt engineering tool. Improves clarity and structure for any request.</p>
+                <div style="font-size: 2rem; margin-bottom: 1rem;">✨</div>
+                <h4>Prompt Refiner</h4>
+                <p>Transform vague ideas into structured, engineer-grade prompts for any context.</p>
             </div>
         """, unsafe_allow_html=True)
         
     with col2:
         st.markdown(f"""
             <div class="feature-card">
-                <h4>📊 Diagrams</h4>
-                <p>Generate strict Mermaid.js diagrams. Visualizes flows, sequences, and ERDs.</p>
+                <div style="font-size: 2rem; margin-bottom: 1rem;">📊</div>
+                <h4>Diagrams</h4>
+                <p>Generate strict, error-free Mermaid.js diagrams. Visualizes flows and architectures.</p>
             </div>
         """, unsafe_allow_html=True)
         
     with col3:
         st.markdown(f"""
             <div class="feature-card">
-                <h4>📝 Documents</h4>
-                <p>Draft professional technical documentation and specifications.</p>
+                <div style="font-size: 2rem; margin-bottom: 1rem;">📝</div>
+                <h4>Documents</h4>
+                <p>Draft professional technical documentation, specs, and manuals in seconds.</p>
             </div>
         """, unsafe_allow_html=True)
 
-# --- TAB: PROMPT REFINER (GENERIC) ---
+# --- TAB: PROMPT REFINER ---
 with tab_rewriter:
-    st.markdown("### ✨ Generic Prompt Refiner")
-    st.markdown("Refine any prompt for better AI performance. Not limited to ERPs.")
+    st.markdown("<br>", unsafe_allow_html=True)
     
     col_rw_1, col_rw_2 = st.columns([1, 1])
     
     with col_rw_1:
-        context_type = st.text_input("Context (Optional)", placeholder="e.g. Coding, Creative Writing, Business...")
-        raw_prompt = st.text_area("Your Draft", height=250, placeholder="Type your rough idea here...")
+        st.markdown("### Input")
+        context_type = st.selectbox("Context", ["General", "Coding / Engineering", "Business / Strategy", "Creative Writing"], index=0)
+        raw_prompt = st.text_area("Draft Idea", height=250, placeholder="Describe what you want to achieve...")
         
         if st.button("Refine Prompt", type="primary", use_container_width=True):
             if not api_key:
@@ -257,13 +367,12 @@ with tab_rewriter:
                     genai.configure(api_key=api_key)
                     model = genai.GenerativeModel("gemini-2.5-flash")
                     
-                    # GENERIC SYSTEM PROMPT
                     system_prompt = """
                     ROLE: Expert Prompt Engineer.
                     GOAL: Rewrite the user's raw input into a structured, highly effective prompt for an LLM.
                     
                     INSTRUCTIONS:
-                    1. Analyze the user's intent.
+                    1. Analyze the user's intent and selected context.
                     2. Add necessary structure (Context, Task, Constraints, Output Format).
                     3. Improve clarity and remove ambiguity.
                     4. Output ONLY the optimized prompt.
@@ -277,23 +386,24 @@ with tab_rewriter:
                     st.error(f"Error: {e}")
 
     with col_rw_2:
-        st.markdown("#### Refined Output")
+        st.markdown("### Result")
         if "rewritten_result" in st.session_state:
-            st.text_area("Copy this:", value=st.session_state.rewritten_result, height=320)
+            st.text_area("Optimized Prompt", value=st.session_state.rewritten_result, height=335)
         else:
             st.info("Your refined prompt will appear here.")
 
 # --- TAB: DIAGRAMS ---
 with tab_diagram:
-    st.markdown("### 📊 Diagram Generator")
+    st.markdown("<br>", unsafe_allow_html=True)
     
     col_d_input, col_d_preview = st.columns([1, 2])
     
     with col_d_input:
+        st.markdown("### Configuration")
         diagram_type = st.selectbox("Type", ["Flowchart (TD)", "Sequence Diagram", "ER Diagram", "State Diagram", "Gantt Chart"])
         diagram_prompt = st.text_area("Requirements", height=200, placeholder="Paste your refined prompt here...")
         
-        if st.button("Generate", type="primary", use_container_width=True):
+        if st.button("Generate Diagram", type="primary", use_container_width=True):
             if not api_key:
                 st.error("API Key required.")
             else:
@@ -318,15 +428,15 @@ with tab_diagram:
                     st.error(f"Error: {e}")
 
     with col_d_preview:
+        st.markdown("### Preview")
         if "generated_mermaid" in st.session_state:
-            st.markdown("#### Preview")
             st.components.v1.html(
                 f"""
                 <script type="module">
                     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
                     mermaid.initialize({{ startOnLoad: true }});
                 </script>
-                <div class="mermaid">
+                <div class="mermaid" style="display: flex; justify-content: center;">
                     {st.session_state.generated_mermaid}
                 </div>
                 """,
@@ -334,7 +444,26 @@ with tab_diagram:
                 scrolling=True
             )
             
-            with st.expander("View Code"):
+            # --- DOWNLOAD OPTIONS ---
+            st.markdown("#### Downloads")
+            d_col1, d_col2, d_col3 = st.columns(3)
+            
+            # Fetch Images
+            png_data = get_mermaid_img(st.session_state.generated_mermaid, "png")
+            svg_data = get_mermaid_img(st.session_state.generated_mermaid, "svg")
+            
+            with d_col1:
+                if png_data:
+                    st.download_button("Download PNG", png_data, "diagram.png", "image/png", use_container_width=True)
+            with d_col2:
+                if svg_data:
+                    st.download_button("Download SVG", svg_data, "diagram.svg", "image/svg+xml", use_container_width=True)
+            with d_col3:
+                if png_data:
+                    pdf_data = create_pdf("Diagram Export", png_data)
+                    st.download_button("Download PDF", pdf_data, "diagram.pdf", "application/pdf", use_container_width=True)
+
+            with st.expander("View Source Code"):
                 st.code(st.session_state.generated_mermaid, language="mermaid")
             
             live_url = generate_mermaid_link(st.session_state.generated_mermaid)
@@ -342,27 +471,44 @@ with tab_diagram:
 
 # --- TAB: DOCUMENTS ---
 with tab_docs:
-    st.markdown("### 📝 Document Generator")
+    st.markdown("<br>", unsafe_allow_html=True)
     
-    doc_type = st.selectbox("Type", ["Business Requirement Doc (BRD)", "Technical Design Doc (TDD)", "API Specification"])
-    doc_prompt = st.text_area("Details", height=150, placeholder="Describe the project...")
+    st.markdown("### Document Generator")
     
-    if st.button("Generate Document", type="primary"):
-        if not api_key:
-            st.error("API Key required.")
-        else:
-            try:
-                genai.configure(api_key=api_key)
-                model = genai.GenerativeModel("gemini-2.5-flash")
-                with st.spinner("Drafting..."):
-                    response = model.generate_content(f"Write a professional {doc_type} for: {doc_prompt}. Use Markdown.")
-                    st.session_state.generated_doc = response.text
-            except Exception as e:
-                st.error(f"Error: {e}")
+    col_doc_1, col_doc_2 = st.columns([1, 2])
+    
+    with col_doc_1:
+        doc_type = st.selectbox("Type", ["Business Requirement Doc (BRD)", "Technical Design Doc (TDD)", "API Specification"])
+        doc_prompt = st.text_area("Details", height=200, placeholder="Describe the project...")
+        
+        if st.button("Generate Document", type="primary", use_container_width=True):
+            if not api_key:
+                st.error("API Key required.")
+            else:
+                try:
+                    genai.configure(api_key=api_key)
+                    model = genai.GenerativeModel("gemini-2.5-flash")
+                    with st.spinner("Drafting..."):
+                        response = model.generate_content(f"Write a professional {doc_type} for: {doc_prompt}. Use Markdown.")
+                        st.session_state.generated_doc = response.text
+                except Exception as e:
+                    st.error(f"Error: {e}")
 
-    if "generated_doc" in st.session_state:
-        st.markdown("---")
-        st.download_button("Download Markdown", st.session_state.generated_doc, "document.md")
-        st.markdown(st.session_state.generated_doc)
+    with col_doc_2:
+        if "generated_doc" in st.session_state:
+            st.markdown("#### Downloads")
+            doc_col1, doc_col2, doc_col3 = st.columns(3)
+            
+            with doc_col1:
+                st.download_button("Download MD", st.session_state.generated_doc, "document.md", use_container_width=True)
+            
+            with doc_col2:
+                docx_data = create_docx(st.session_state.generated_doc)
+                st.download_button("Download DOCX", docx_data, "document.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", use_container_width=True)
+            
+            with doc_col3:
+                pdf_doc_data = create_pdf(st.session_state.generated_doc)
+                st.download_button("Download PDF", pdf_doc_data, "document.pdf", "application/pdf", use_container_width=True)
 
-
+            st.markdown("---")
+            st.markdown(st.session_state.generated_doc)
