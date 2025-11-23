@@ -33,15 +33,15 @@ if 'user_prefs' not in st.session_state:
 
 # --- THEME CONFIGURATION (Brand Colors) ---
 THEME = {
-    "primary": "#FF5A36",        # Vermilion/Action Orange
-    "primary_dark": "#E64A19",   # Darker Orange for hover
-    "accent": "#FF7A5C",         # Lighter Orange
+    "primary": "#4F46E5",        # Electric Indigo (Deep Ocean primary)
+    "primary_dark": "#4338CA",   # Darker Indigo for hover
+    "accent": "#0EA5E9",         # Sky Blue accent
     "success": "#10B981",        # Emerald-500 (keep for success states)
-    "bg": "#E5E6DA",             # Warm Linen - main background
-    "surface": "#FFFFFF",        # White - cards and surfaces
-    "text_main": "#000000",      # Black - primary text
-    "text_secondary": "#4A4A4A", # Dark Gray - secondary text
-    "border": "#D0D1C6",         # Slightly darker linen for borders
+    "bg": "#F8FAFC",             # Cultured light gray background
+    "surface": "#FFFFFF",        # Pure white for cards and surfaces
+    "text_main": "#0F172A",      # Dark Slate for headings
+    "text_secondary": "#64748B", # Slate-500 for body text
+    "border": "#E2E8F0",         # Light border gray
     "shadow": "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
     "shadow_lg": "0 10px 15px -3px rgba(0, 0, 0, 0.1)"
 }
@@ -178,27 +178,82 @@ def sanitize_mermaid_code(raw_text):
 # --- CUSTOM CSS ---
 st.markdown(f"""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&family=Tiro+Bangla:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
-    .stApp {{
-        background: linear-gradient(135deg, {THEME['bg']} 0%, #D4D5CA 100%);
-        font-family: 'Inter', sans-serif;
-    }}
-    
-    .block-container {{
-        max-width: 1600px !important;
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        border-radius: 24px;
-        box-shadow: {THEME['shadow_lg']};
-        margin: 2rem auto !important;
-    }}
-    
-    h1, h2, h3, h4 {{
-        font-family: 'Poppins', sans-serif !important;
-        font-weight: 700;
-        color: {THEME['text_main']} !important;
-    }}
+        :root {{
+            --primary: {THEME['primary']};
+            --primary-dark: {THEME['primary_dark']};
+            --accent: {THEME['accent']};
+            --bg: {THEME['bg']};
+            --surface: {THEME['surface']};
+            --text-main: {THEME['text_main']};
+            --text-secondary: {THEME['text_secondary']};
+            --border: {THEME['border']};
+            --shadow: {THEME['shadow']};
+            --shadow-lg: {THEME['shadow_lg']};
+        }}
+
+        .stApp {{
+            background: var(--bg);
+            font-family: 'Inter', sans-serif;
+        }}
+
+        .block-container {{
+            max-width: 1200px !important;
+            background: var(--surface);
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            margin: 2rem auto !important;
+            padding: 1.5rem;
+        }}
+
+        h1, h2, h3, h4 {{
+            color: var(--text-main) !important;
+        }}
+
+        /* Pill‑style navigation */
+        .stTabs > div > button {{
+            background: var(--primary);
+            color: white;
+            border-radius: 9999px;
+            padding: 0.5rem 1rem;
+            margin: 0 0.25rem;
+            border: none;
+            font-weight: 600;
+            transition: background 0.3s;
+        }}
+        .stTabs > div > button:hover {{
+            background: var(--primary-dark);
+        }}
+        .stTabs > div > button[data-selected] {{
+            background: var(--accent);
+        }}
+
+        /* Consistent button style */
+        .stButton > button {{
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            padding: 0.75rem 1.25rem;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s;
+        }}
+        .stButton > button:hover {{
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }}
+
+        .stDownloadButton > button {{
+            background: var(--primary);
+            color: white;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+        }}
+        .stDownloadButton > button:hover {{
+            background: var(--primary-dark);
+        }}
     
     /* More targeted text color fixes */
     p {{
@@ -351,43 +406,9 @@ st.markdown(f"""
         color: {THEME['text_secondary']} !important;
     }}
 
-    .stTabs [data-baseweb="tab-list"] {{
-        gap: 0.75rem;
-        background: linear-gradient(135deg, {THEME['primary']} 0%, {THEME['accent']} 100%);
-        padding: 0.75rem;
-        border-radius: 16px;
-    }}
-    
-    .stTabs [data-baseweb="tab"] {{
-        background: rgba(255,255,255,0.2);
-        backdrop-filter: blur(10px);
-        color: white !important;
-        font-weight: 600;
-        border-radius: 12px;
-        padding: 0.75rem 1.5rem;
-    }}
-    
-    .stTabs [aria-selected="true"] {{
-        background: white !important;
-        color: {THEME['primary']} !important;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }}
+    /* The old .stTabs [data-baseweb="tab-list"] and .stTabs [data-baseweb="tab"] and .stTabs [aria-selected="true"] rules are replaced by the new pill-style navigation */
 
-    div.stButton > button[kind="primary"] {{
-        background: linear-gradient(135deg, {THEME['primary']} 0%, {THEME['primary_dark']} 100%) !important;
-        color: white !important;
-        border-radius: 12px !important;
-        padding: 0.85rem 1.75rem !important;
-        font-weight: 600 !important;
-    }}
-    
-    div.stButton > button {{
-        background-color: {THEME['text_main']} !important;
-        color: white !important;
-        border-radius: 12px !important;
-        padding: 0.85rem 1.75rem !important;
-        font-weight: 600 !important;
-    }}
+    /* The old div.stButton > button[kind="primary"] and div.stButton > button rules are replaced by the new consistent button style */
     
     div.stButton > button:hover {{
         opacity: 0.9;
@@ -403,20 +424,7 @@ st.markdown(f"""
     }}
     
     /* Fix download buttons - COMPREHENSIVE */
-    .stDownloadButton > button {{
-        background-color: {THEME['text_main']} !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 12px !important;
-        padding: 0.75rem 1.5rem !important;
-        font-weight: 600 !important;
-        transition: all 0.3s ease !important;
-    }}
-    
-    .stDownloadButton > button:hover {{
-        background-color: {THEME['primary']} !important;
-        color: white !important;
-    }}
+    /* The old .stDownloadButton > button rules are replaced by the new consistent download button style */
     
     .stDownloadButton > button > div {{
         color: white !important;
@@ -583,9 +591,16 @@ st.markdown(f"""
 
 # --- TABS ---
 tabs = st.tabs([
-    "🔑 API", "✨ Prompts", "📊 Diagrams", "📝 Docs",
-    "💻 Code", "📚 Summarize", "🌐 Translate", 
-    "✉️ Emails", "🔍 Analyze", "📝 Quizzes"
+    "🔑 API",
+    "✨ Prompt Refiner",
+    "📊 Diagram Generator",
+    "📝 Document Generator",
+    "💻 Code Generator",
+    "📚 Summarizer",
+    "🌐 Translator",
+    "✉️ Email Writer",
+    "🔍 Analyzer",
+    "📝 Quiz Generator"
 ])
 
 # === TAB 1: API KEY ===
