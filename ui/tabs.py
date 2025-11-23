@@ -153,25 +153,25 @@ def _render_document_generator_tab():
 
 def _render_diagram_generator_tab():
     st.markdown("### 📊 Diagram Generator")
-    col1, col2 = st.columns([1, 2])
-    with col1:
-        diagram_template = st.selectbox("Template", ["None"] + list(st.session_state.get('DIAGRAM_TEMPLATES', {}).keys()), key="diagram_template")
-        diagram_theme = st.selectbox("Theme", ["default", "dark", "forest", "neutral"], key="diagram_theme")
-        diagram_type = st.selectbox("Type", ["Flowchart", "Sequence", "ER Diagram", "Gantt", "Mindmap"], key="diagram_type")
-        base_code = st.session_state.DIAGRAM_TEMPLATES.get(diagram_template, "") if diagram_template != "None" else ""
-        custom_code = st.text_area("Custom Mermaid Code", value=base_code, height=200, key="diagram_code")
-    with col2:
-        if st.button("🎨 Generate", type="primary"):
-            client = GeminiClient(st.session_state.get("api_key"))
-            sys_prompt = f"You are a Mermaid diagram expert. Generate syntactically perfect Mermaid code for a {diagram_type}."
-            res = client.generate_content(f"{sys_prompt}\n{custom_code}")
-            
-            if "⚠️" in res or "❌" in res:
-                st.markdown(res)
-            else:
-                st.session_state.mermaid_code = helpers.sanitize_mermaid_code(res)
-                helpers.add_to_history(st, "Diagrams", st.session_state.mermaid_code, diagram_type)
-                st.success("✅ Diagram generated!")
+    
+    diagram_template = st.selectbox("Template", ["None"] + list(st.session_state.get('DIAGRAM_TEMPLATES', {}).keys()), key="diagram_template")
+    diagram_theme = st.selectbox("Theme", ["default", "dark", "forest", "neutral"], key="diagram_theme")
+    diagram_type = st.selectbox("Type", ["Flowchart", "Sequence", "ER Diagram", "Gantt", "Mindmap"], key="diagram_type")
+    
+    base_code = st.session_state.DIAGRAM_TEMPLATES.get(diagram_template, "") if diagram_template != "None" else ""
+    custom_code = st.text_area("Context", value=base_code, height=200, key="diagram_code")
+    
+    if st.button("🎨 Generate", type="primary"):
+        client = GeminiClient(st.session_state.get("api_key"))
+        sys_prompt = f"You are a Mermaid diagram expert. Generate syntactically perfect Mermaid code for a {diagram_type}."
+        res = client.generate_content(f"{sys_prompt}\n{custom_code}")
+        
+        if "⚠️" in res or "❌" in res:
+            st.markdown(res)
+        else:
+            st.session_state.mermaid_code = helpers.sanitize_mermaid_code(res)
+            helpers.add_to_history(st, "Diagrams", st.session_state.mermaid_code, diagram_type)
+            st.success("✅ Diagram generated!")
 
     if "mermaid_code" in st.session_state:
         st.markdown("#### 👁️ Preview")
