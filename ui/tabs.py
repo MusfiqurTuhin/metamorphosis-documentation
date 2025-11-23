@@ -34,6 +34,27 @@ def _render_api_tab():
     else:
         st.info("Using System Default Key")
 
+    # Bengali User Manual for API Key Creation
+    with st.expander("📘 কীভাবে Google AI Studio থেকে API Key তৈরি করবেন (বাংলা নির্দেশিকা)"):
+        st.markdown("""
+        <div class="bangla-text" style="padding: 1rem; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef;">
+            <h4 style="color: #FF5A36;">Google AI Studio API Key তৈরির ধাপসমূহ:</h4>
+            <ol>
+                <li>প্রথমে <a href="https://aistudio.google.com/" target="_blank" style="color: #FF5A36; font-weight: bold;">Google AI Studio</a> ওয়েবসাইটে যান।</li>
+                <li>আপনার Google অ্যাকাউন্ট দিয়ে সাইন ইন করুন।</li>
+                <li>বাম পাশের মেনু থেকে <b>"Get API key"</b> বাটনে ক্লিক করুন।</li>
+                <li><b>"Create API key"</b> বাটনে ক্লিক করুন।</li>
+                <li>আপনার যদি কোনো প্রজেক্ট না থাকে, তবে <b>"Create API key in new project"</b> সিলেক্ট করুন।</li>
+                <li>কিছুক্ষণ অপেক্ষা করুন, একটি পপ-আপ উইন্ডোতে আপনার নতুন API Key দেখতে পাবেন।</li>
+                <li><b>"Copy"</b> বাটনে ক্লিক করে Key-টি কপি করুন।</li>
+                <li>এবার এই অ্যাপের <b>"Gemini API Key"</b> বক্সে পেস্ট করে <b>"Save & Verify"</b> বাটনে ক্লিক করুন।</li>
+            </ol>
+            <p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
+                <i>দ্রষ্টব্য: Google AI Studio-তে API Key তৈরি করা সম্পূর্ণ বিনামূল্যে (Free Tier ব্যবহারকারীদের জন্য)।</i>
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
 def _render_prompt_refiner_tab():
     st.markdown("### ✨ Prompt Refiner")
     col1, col2 = st.columns(2)
@@ -67,6 +88,7 @@ def _render_prompt_refiner_tab():
 
 def _render_document_generator_tab():
     st.markdown("### 📝 Document Generator")
+    st.caption("Generate professional documents like BRDs, TDDs, and Manuals. Upload context files for better accuracy.")
     col1, col2 = st.columns([1, 2])
     with col1:
         doc_type = st.selectbox("Type", ["BRD", "TDD", "API Spec", "User Manual", "SOP", "Report", "Other"])

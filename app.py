@@ -33,17 +33,17 @@ if 'user_prefs' not in st.session_state:
 
 # --- THEME CONFIGURATION (Brand Colors) ---
 THEME = {
-    "primary": "#4F46E5",        # Electric Indigo (Deep Ocean primary)
-    "primary_dark": "#4338CA",   # Darker Indigo for hover
-    "accent": "#0EA5E9",         # Sky Blue accent
-    "success": "#10B981",        # Emerald-500 (keep for success states)
-    "bg": "#F8FAFC",             # Cultured light gray background
-    "surface": "#FFFFFF",        # Pure white for cards and surfaces
-    "text_main": "#0F172A",      # Dark Slate for headings
-    "text_secondary": "#64748B", # Slate-500 for body text
-    "border": "#E2E8F0",         # Light border gray
-    "shadow": "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-    "shadow_lg": "0 10px 15px -3px rgba(0, 0, 0, 0.1)"
+    "primary": "#FF5A36",        # Vermilion / Action Orange
+    "primary_dark": "#E04828",   # Darker shade for hover
+    "accent": "#FF5A36",         # Same as primary for consistency
+    "success": "#10B981",        # Emerald (keep for success states)
+    "bg": "#E5E6DA",             # Warm Linen
+    "surface": "#FFFFFF",        # White
+    "text_main": "#000000",      # Black
+    "text_secondary": "#333333", # Dark Gray
+    "border": "#000000",         # Black border for high contrast
+    "shadow": "0 4px 0px 0px rgba(0,0,0,1)", # Brutalist/Neo-SaaS hard shadow
+    "shadow_lg": "0 8px 0px 0px rgba(0,0,0,1)",
 }
 
 # --- TEMPLATES ---
@@ -178,7 +178,7 @@ def sanitize_mermaid_code(raw_text):
 # --- CUSTOM CSS ---
 st.markdown(f"""
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700&family=Playfair+Display:wght@400;700&display=swap');
 
         :root {{
             --primary: {THEME['primary']};
@@ -193,61 +193,103 @@ st.markdown(f"""
             --shadow-lg: {THEME['shadow_lg']};
         }}
 
-        .stApp {{
-            background: var(--bg);
-            font-family: 'Inter', sans-serif;
+        /* Global Font Settings */
+        html, body, [class*="css"] {{
+            font-family: 'Playfair Display', serif;
+            color: var(--text-main);
+        }}
+        
+        /* Bengali Text Class */
+        .bangla-text {{
+            font-family: 'Noto Serif Bengali', serif;
         }}
 
+        /* App Background */
+        .stApp {{
+            background-color: var(--bg);
+        }}
+
+        /* Main Container */
         .block-container {{
             max-width: 1200px !important;
-            background: var(--surface);
-            border-radius: 16px;
-            box-shadow: var(--shadow-lg);
             margin: 2rem auto !important;
-            padding: 1.5rem;
-        }}
-
-        h1, h2, h3, h4 {{
-            color: var(--text-main) !important;
-        }}
-
-        /* Pill‑style navigation */
-        .stTabs > div > button {{
-            background: var(--primary);
-            color: white;
-            border-radius: 9999px;
-            padding: 0.5rem 1rem;
-            margin: 0 0.25rem;
-            border: none;
-            font-weight: 600;
-            transition: background 0.3s;
-        }}
-        .stTabs > div > button:hover {{
-            background: var(--primary-dark);
-        }}
-        .stTabs > div > button[data-selected] {{
-            background: var(--accent);
-        }}
-
-        /* Consistent button style */
-        .stButton > button {{
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            padding: 0.75rem 1.25rem;
+            background: var(--surface);
+            border: 2px solid var(--border);
             box-shadow: var(--shadow);
-            transition: transform 0.2s;
+            padding: 3rem !important;
+            border-radius: 0px; /* Sharp corners for Neo-SaaS look */
+        }}
+
+        /* Headings */
+        h1, h2, h3, h4, h5, h6 {{
+            font-family: 'Playfair Display', serif;
+            color: var(--text-main) !important;
+            font-weight: 700;
+        }}
+
+        /* Buttons */
+        .stButton > button {{
+            background-color: var(--primary) !important;
+            color: white !important;
+            border: 2px solid black !important;
+            border-radius: 0px !important;
+            box-shadow: 4px 4px 0px 0px black !important;
+            font-family: 'Playfair Display', serif !important;
+            font-weight: 700 !important;
+            transition: all 0.2s ease-in-out !important;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }}
         .stButton > button:hover {{
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
+            transform: translate(2px, 2px) !important;
+            box-shadow: 2px 2px 0px 0px black !important;
+            background-color: var(--primary-dark) !important;
+        }}
+        .stButton > button:active {{
+            transform: translate(4px, 4px) !important;
+            box-shadow: 0px 0px 0px 0px black !important;
         }}
 
-        .stDownloadButton > button {{
-            background: var(--primary);
-            color: white;
+        /* Inputs */
+        .stTextInput > div > div > input, 
+        .stTextArea > div > div > textarea, 
+        .stSelectbox > div > div > div {{
+            background-color: white !important;
+            border: 2px solid black !important;
+            border-radius: 0px !important;
+            color: black !important;
+            font-family: 'Playfair Display', serif !important;
+            box-shadow: 4px 4px 0px 0px rgba(0,0,0,0.1) !important;
+        }}
+        .stTextInput > div > div > input:focus, 
+        .stTextArea > div > div > textarea:focus {{
+            box-shadow: 4px 4px 0px 0px var(--primary) !important;
+            border-color: var(--primary) !important;
+        }}
+
+        /* Tabs */
+        .stTabs [data-baseweb="tab-list"] {{
+            gap: 10px;
+            background-color: transparent;
+        }}
+        .stTabs [data-baseweb="tab"] {{
+            background-color: white;
+            border: 2px solid black;
+            border-radius: 0px;
+            padding: 10px 20px;
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            box-shadow: 4px 4px 0px 0px black;
+        }}
+        .stTabs [data-baseweb="tab"]:hover {{
+            color: var(--primary);
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px 0px black;
+        }}
+        .stTabs [aria-selected="true"] {{
+            background-color: var(--primary) !important;
+            color: white !important;
+        }}
             border-radius: 8px;
             padding: 0.5rem 1rem;
         }}
