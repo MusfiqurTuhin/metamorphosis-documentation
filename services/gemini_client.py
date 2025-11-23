@@ -9,9 +9,6 @@ import google.generativeai as genai
 import streamlit as st
 from google.api_core import exceptions
 
-import google.generativeai as genai
-import streamlit as st
-from google.api_core import exceptions
 
 class GeminiClient:
     def __init__(self, user_api_key=None):
@@ -46,10 +43,10 @@ class GeminiClient:
     def _handle_quota_error(self):
         """Return the Bengali instruction message for quota limits."""
         return (
-            "⚠️ **API Quota Limit Exceeded**\n\n"
-            "The default API key has reached its usage limit. Please use your own API key.\n\n"
-            "**Bengali Instruction:**\n"
-            "আপনার ডিফল্ট API কী-এর সীমা শেষ হয়ে গেছে। অনুগ্রহ করে নিজের API কী ব্যবহার করুন।\n"
+            "⚠️ **API Quota Limit Exceeded**\\n\\n"
+            "Your API key has reached its usage limit. Please check your quota or use a different API key.\\n\\n"
+            "**Bengali Instruction:**\\n"
+            "আপনার API কী-এর সীমা শেষ হয়ে গেছে। অনুগ্রহ করে নতুন API কী ব্যবহার করুন।\\n"
             "নতুন API কী পেতে ভিজিট করুন: [Google AI Studio](https://aistudio.google.com/)"
         )
 
