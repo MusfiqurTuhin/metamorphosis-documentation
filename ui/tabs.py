@@ -63,14 +63,12 @@ def _render_api_tab():
 def _render_prompt_refiner_tab():
     st.markdown("### ✨ Prompt Refiner")
     
-    # Prompt templates may be empty; show dropdown only if available
-    prompt_templates = list(st.session_state.get('PROMPT_TEMPLATES', {}).keys())
-    if prompt_templates:
-        template = st.selectbox("Template", prompt_templates, key="refiner_template")
-        st.info(st.session_state.PROMPT_TEMPLATES[template])
-    else:
-        template = None
-        st.info("No prompt templates available.")
+    # Prompt templates may be empty; ensure there is at least a fallback option
+    prompt_templates = list(st.session_state.get('PROMPT_TEMPLATES', {}).keys()) or ["Default"]
+    template = st.selectbox("Template", prompt_templates, key="refiner_template")
+    if template != "Default":
+        st.info(st.session_state.PROMPT_TEMPLATES.get(template, ""))
+    # No additional action needed when only default template is present
     context = st.selectbox("Context", ["General", "Software Engineering", "Data Science", "Legal", "Medical", "Business", "Creative"], key="refiner_context")
     tone = st.select_slider("Tone", ["Casual", "Neutral", "Professional", "Academic"], key="refiner_tone")
     complexity = st.slider("Complexity", 1, 10, 7, key="refiner_complexity")
@@ -101,8 +99,8 @@ def _render_document_generator_tab():
     st.markdown("### 📝 Document Generator")
     st.caption("Generate professional documents like BRDs, TDDs, and Manuals. Upload context files for better accuracy.")
     
-    doc_type = st.selectbox("Type", ["BRD", "TDD", "API Spec", "User Manual", "SOP", "Report", "Other"], key="doc_type")
-    doc_style = st.selectbox("Style", ["Professional", "Academic", "Technical", "Simple"], key="doc_style")
+    doc_type = st.selectbox("Type", ["BRD", "TDD", "API Spec", "User Manual", "SOP", "Report", "Presentation", "Other"], key="doc_type")
+    doc_style = st.selectbox("Style", ["Professional", "Academic", "Technical", "Simple", "Creative"], key="doc_style")
     include_toc = st.checkbox("Include Table of Contents", value=True, key="doc_toc")
     include_meta = st.checkbox("Include Metadata", key="doc_meta")
     if include_meta:
@@ -161,12 +159,10 @@ def _render_document_generator_tab():
 def _render_diagram_generator_tab():
     st.markdown("### 📊 Diagram Generator")
     
-    diagram_templates = list(st.session_state.get('DIAGRAM_TEMPLATES', {}).keys())
-    diagram_template = None
-    if diagram_templates:
-        diagram_template = st.selectbox("Template", diagram_templates, key="diagram_template")
-    else:
-        st.info("No diagram templates available. Add some in the settings!")
+    diagram_templates = list(st.session_state.get('DIAGRAM_TEMPLATES', {}).keys()) or ["Default"]
+    diagram_template = st.selectbox("Template", diagram_templates, key="diagram_template")
+    if diagram_template == "Default":
+        diagram_template = None
 
     diagram_theme = st.selectbox("Theme", ["default", "dark", "forest", "neutral"], key="diagram_theme")
     diagram_type = st.selectbox("Type", ["Flowchart", "Sequence", "ER Diagram", "Gantt", "Mindmap"], key="diagram_type")
@@ -387,7 +383,7 @@ def _render_analyzer_tab():
 def _render_quiz_generator_tab():
     st.markdown("### 📝 Quiz Generator")
     
-    q_type = st.selectbox("Type", ["MCQ", "True/False", "Short Answer", "Mixed"], key="quiz_type")
+    q_type = st.selectbox("Type", ["MCQ", "True/False", "Short Answer", "Mixed", "Fill in the Blank"], key="quiz_type")
     num_q = st.slider("Number of Questions", 5, 30, 10, key="quiz_num")
     difficulty = st.select_slider("Difficulty", ["Easy", "Medium", "Hard"], key="quiz_diff")
     show_advanced = st.checkbox("Show Advanced Options", key="quiz_advanced")
