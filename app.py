@@ -809,7 +809,41 @@ with tabs[3]:
                 author = st.text_input("Author")
                 version = st.text_input("Version", "1.0")
         
-        doc_details = st.text_area("Content Details", height=300)
+        # File Upload for Context
+        st.markdown("#### 📤 Upload Context File (Optional)")
+        uploaded_file = st.file_uploader(
+            "Upload company profile, reference docs, etc.", 
+            type=["txt", "md", "pdf", "docx"],
+            help="Upload a file to provide context for document generation",
+            key="doc_context_upload"
+        )
+        
+        context_text = ""
+        if uploaded_file is not None:
+            try:
+                if uploaded_file.type == "text/plain" or uploaded_file.name.endswith(".txt"):
+                    context_text = uploaded_file.read().decode("utf-8")
+                elif uploaded_file.name.endswith(".md"):
+                    context_text = uploaded_file.read().decode("utf-8")
+                elif uploaded_file.name.endswith(".docx"):
+                    doc = Document(io.BytesIO(uploaded_file.read()))
+                    context_text = "\n".join([para.text for para in doc.paragraphs])
+                elif uploaded_file.name.endswith(".pdf"):
+                    # Basic PDF text extraction (requires pypdf)
+                    try:
+                        import PyPDF2
+                        pdf_reader = PyPDF2.PdfReader(io.BytesIO(uploaded_file.read()))
+                        context_text = "\n".join([page.extract_text() for page in pdf_reader.pages])
+                    except ImportError:
+                        st.warning("⚠️ PDF support requires pypdf. Using filename only.")
+                        context_text = f"[PDF file: {uploaded_file.name}]"
+                
+                if context_text:
+                    st.success(f"✅ Loaded {len(context_text)} characters from {uploaded_file.name}")
+            except Exception as e:
+                st.error(f"❌ Error reading file: {e}")
+        
+        doc_details = st.text_area("Content Details", height=250, key="doc_details_input")
         
         if st.button("📄 Generate", type="primary"):
             if "api_key" in st.session_state:
@@ -819,9 +853,16 @@ with tabs[3]:
                     sys_prompt = f"Write {doc_type}. Style: {doc_style}. Markdown format."
                     if show_advanced and include_toc:
                         sys_prompt += " Include TOC."
-                    res = model.generate_content(f"{sys_prompt}\n{doc_details}")
+                    
+                    # Add context if file uploaded
+                    full_prompt = f"{sys_prompt}\n\nCONTENT REQUIREMENTS:\n{doc_details}"
+                    if context_text:
+                        full_prompt += f"\n\nCONTEXT FROM UPLOADED FILE:\n{context_text[:5000]}"  # Limit to 5000 chars
+                    
+                    res = model.generate_content(full_prompt)
                     st.session_state.doc_content = res.text
                     add_to_history("Documents", st.session_state.doc_content, doc_type)
+                    st.success("✅ Document generated with uploaded context!")
                 except Exception as e:
                     st.error(f"❌ {e}")
     
@@ -831,13 +872,25 @@ with tabs[3]:
             st.markdown(st.session_state.doc_content)
             st.markdown("---")
             
-            dl1, dl2, dl3 = st.columns(3)
+            st.markdown("#### 💾 Downloads & Export")
+            dl1, dl2, dl3, dl4 = st.columns(4)
             with dl1:
-                st.download_button("MD", st.session_state.doc_content, "doc.md", use_container_width=True)
+                st.download_button("📥 MD", st.session_state.doc_content, "document.md", use_container_width=True)
             with dl2:
-                st.download_button("DOCX", create_docx(st.session_state.doc_content), "doc.docx", use_container_width=True)
+                st.download_button("📥 DOCX", create_docx(st.session_state.doc_content), "document.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", use_container_width=True)
             with dl3:
-                st.download_button("PDF", create_pdf(st.session_state.doc_content), "doc.pdf", use_container_width=True)
+                st.download_button("📥 PDF", create_pdf(st.session_state.doc_content), "document.pdf", "application/pdf", use_container_width=True)
+            with dl4:
+                # Google Docs export link
+                import urllib.parse
+                gdocs_url = f"https://docs.google.com/document/create?title={urllib.parse.quote('Document from Metamorphosis Studio')}"
+                st.markdown(f'<a href="{gdocs_url}" target="_blank"><button style="width:100%; padding:0.75rem; background:#4285F4; color:white; border:none; border-radius:12px; font-weight:600; cursor:pointer;">📄 Google Docs</button></a>', unsafe_allow_html=True)
+            
+            # Copy to clipboard option
+            st.markdown("#### 📋 Quick Actions")
+            if st.button("📋 Copy to Clipboard", use_container_width=True):
+                st.code(st.session_state.doc_content, language="markdown")
+                st.info("💡 Select all text above and copy (Ctrl+A, Ctrl+C)")
 
 # === TAB 5: CODE GENERATOR ===
 with tabs[4]:
