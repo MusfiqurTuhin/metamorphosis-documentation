@@ -200,12 +200,23 @@ st.markdown(f"""
         color: {THEME['text_main']} !important;
     }}
     
-    p, span, label, div {{
+    /* More targeted text color fixes */
+    p {{
+        color: {THEME['text_main']} !important;
+    }}
+    
+    label {{
         color: {THEME['text_main']} !important;
     }}
     
     .bangla-text {{
         font-family: 'Tiro Bangla', serif !important;
+        color: {THEME['text_main']} !important;
+    }}
+    
+    /* Force white background on ALL inputs */
+    input, textarea, select {{
+        background-color: {THEME['surface']} !important;
         color: {THEME['text_main']} !important;
     }}
 
@@ -222,14 +233,74 @@ st.markdown(f"""
         border: 2px solid {THEME['border']} !important;
     }}
     
-    /* Fix selectbox */
+    /* Fix selectbox - COMPREHENSIVE */
     .stSelectbox > div > div {{
         background-color: {THEME['surface']} !important;
         color: {THEME['text_main']} !important;
     }}
     
+    /* Fix dropdown menu items */
+    [data-baseweb="select"] {{
+        background-color: {THEME['surface']} !important;
+    }}
+    
+    [data-baseweb="select"] > div {{
+        background-color: {THEME['surface']} !important;
+        color: {THEME['text_main']} !important;
+    }}
+    
+    /* Fix dropdown options */
+    [role="option"] {{
+        background-color: {THEME['surface']} !important;
+        color: {THEME['text_main']} !important;
+    }}
+    
+    [role="option"]:hover {{
+        background-color: {THEME['bg']} !important;
+        color: {THEME['text_main']} !important;
+    }}
+    
+    /* Fix listbox */
+    [role="listbox"] {{
+        background-color: {THEME['surface']} !important;
+    }}
+    
+    [role="listbox"] li {{
+        background-color: {THEME['surface']} !important;
+        color: {THEME['text_main']} !important;
+    }}
+    
+    [role="listbox"] li:hover {{
+        background-color: {THEME['bg']} !important;
+    }}
+    
     /* Fix all dropdown text */
     [data-baseweb="select"] span {{
+        color: {THEME['text_main']} !important;
+    }}
+    
+    [data-baseweb="select"] div {{
+        color: {THEME['text_main']} !important;
+        background-color: {THEME['surface']} !important;
+    }}
+    
+    /* Fix menu container */
+    [data-baseweb="menu"] {{
+        background-color: {THEME['surface']} !important;
+    }}
+    
+    [data-baseweb="menu"] li {{
+        background-color: {THEME['surface']} !important;
+        color: {THEME['text_main']} !important;
+    }}
+    
+    /* Fix select slider */
+    .stSelectSlider {{
+        background-color: {THEME['surface']} !important;
+    }}
+    
+    .stSelectSlider > div {{
+        background-color: {THEME['surface']} !important;
         color: {THEME['text_main']} !important;
     }}
     
@@ -384,6 +455,54 @@ st.markdown(f"""
     
     /* Ensure form labels are visible */
     .stForm label {{
+        color: {THEME['text_main']} !important;
+    }}
+    
+    /* ULTRA-SPECIFIC FIXES for dropdowns and popovers */
+    [data-baseweb="popover"] {{
+        background-color: {THEME['surface']} !important;
+    }}
+    
+    [data-baseweb="popover"] * {{
+        background-color: {THEME['surface']} !important;
+        color: {THEME['text_main']} !important;
+    }}
+    
+    /* Fix any remaining black on black */
+    div[class*="Select"] {{
+        background-color: {THEME['surface']} !important;
+        color: {THEME['text_main']} !important;
+    }}
+    
+    div[class*="select"] {{
+        background-color: {THEME['surface']} !important;
+        color: {THEME['text_main']} !important;
+    }}
+    
+    /* Ensure all text in widgets is black */
+    .stWidget {{
+        color: {THEME['text_main']} !important;
+    }}
+    
+    .stWidget * {{
+        color: {THEME['text_main']} !important;
+    }}
+    
+    /* Fix dropdown value display */
+    [data-baseweb="select"] [data-testid] {{
+        background-color: {THEME['surface']} !important;
+        color: {THEME['text_main']} !important;
+    }}
+    
+    /* Force all baseui components to have white bg */
+    [class*="baseui"] {{
+        background-color: {THEME['surface']} !important;
+        color: {THEME['text_main']} !important;
+    }}
+    
+    /* Fix input value text */
+    [data-baseweb="input"] input {{
+        background-color: {THEME['surface']} !important;
         color: {THEME['text_main']} !important;
     }}
     </style>
