@@ -8,34 +8,32 @@ import requests
 from fpdf import FPDF
 from docx import Document
 import io
+from PIL import Image
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(
-    page_title="Metamorphosis Architect",
-    page_icon="🦋",
+    page_title="Site A-Z",
+    page_icon="🍊",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# --- THEME CONFIGURATION (Deep Ocean / Neo-SaaS) ---
+# --- THEME CONFIGURATION (Orange / Black / White) ---
 THEME = {
-    "primary": "#4F46E5",       # Electric Indigo
-    "primary_hover": "#4338CA", # Indigo-700
-    "accent": "#0EA5E9",        # Sky-500
-    "bg": "#F8FAFC",            # Cultured (Slate-50)
-    "surface": "#FFFFFF",       # Pure White
-    "text_main": "#0F172A",     # Slate-900
-    "text_secondary": "#64748B",# Slate-500
-    "border": "#E2E8F0",        # Slate-200
-    "shadow_sm": "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
-    "shadow_md": "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-    "shadow_lg": "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)"
+    "primary": "#FF5722",       # Deep Orange
+    "primary_hover": "#E64A19", # Darker Orange
+    "bg": "#FFFFFF",            # Pure White
+    "surface": "#FAFAFA",       # Off-White
+    "text_main": "#000000",     # Black
+    "text_secondary": "#424242",# Dark Gray
+    "border": "#E0E0E0",        # Light Gray
+    "shadow": "0 2px 5px rgba(0,0,0,0.1)"
 }
 
 # --- CUSTOM CSS ---
 st.markdown(f"""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
     /* BASE RESET */
     .stApp {{
@@ -47,179 +45,138 @@ st.markdown(f"""
     /* TYPOGRAPHY */
     h1, h2, h3, h4, h5, h6 {{
         font-family: 'Inter', sans-serif !important;
-        font-weight: 600;
-        letter-spacing: -0.02em;
+        font-weight: 700;
         color: {THEME['text_main']};
+        letter-spacing: -0.5px;
     }}
     
     p, li, label, .stMarkdown {{
         color: {THEME['text_secondary']};
-        font-size: 0.95rem;
+        font-size: 1rem;
         line-height: 1.6;
     }}
     
     code {{
         font-family: 'JetBrains Mono', monospace !important;
-        font-size: 0.85rem;
+        font-size: 0.9rem;
+        background-color: #F5F5F5;
+        padding: 2px 4px;
+        border-radius: 4px;
     }}
 
-    /* CENTRALIZED LAYOUT CONTAINER */
-    .block-container {{
-        max-width: 1000px !important;
-        padding-top: 2rem !important;
-        padding-bottom: 4rem !important;
-    }}
-
-    /* NAVIGATION (PILL STYLE) */
+    /* NAVIGATION (Orange Tabs) */
     .stTabs [data-baseweb="tab-list"] {{
-        gap: 0.5rem;
+        gap: 1rem;
         background-color: {THEME['surface']};
-        padding: 0.5rem;
-        border-radius: 9999px; /* Pill shape */
-        box-shadow: {THEME['shadow_sm']};
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
         border: 1px solid {THEME['border']};
-        margin-bottom: 3rem;
-        display: inline-flex;
-        width: auto;
-        margin-left: auto;
-        margin-right: auto;
+        margin-bottom: 2rem;
     }}
     
     .stTabs [data-baseweb="tab"] {{
-        height: 2.5rem;
+        height: 3rem;
         padding: 0 1.5rem;
-        border-radius: 9999px;
         background-color: transparent;
         border: none;
         color: {THEME['text_secondary']};
-        font-weight: 500;
-        font-size: 0.9rem;
+        font-weight: 600;
+        font-size: 1rem;
+        border-radius: 6px;
         transition: all 0.2s ease;
     }}
     
     .stTabs [aria-selected="true"] {{
         background-color: {THEME['primary']} !important;
         color: white !important;
-        box-shadow: {THEME['shadow_sm']};
+        box-shadow: {THEME['shadow']};
     }}
 
-    /* CARDS (NEO-SAAS) */
-    .feature-card {{
+    /* CARDS & CONTAINERS */
+    .block-container {{
+        max-width: 1200px !important;
+        padding-top: 2rem !important;
+    }}
+    
+    div[data-testid="stExpander"] {{
+        border: 1px solid {THEME['border']};
+        border-radius: 8px;
         background-color: {THEME['surface']};
-        border: 1px solid transparent;
-        border-radius: 16px;
-        padding: 2rem;
-        box-shadow: {THEME['shadow_md']};
-        transition: all 0.3s ease;
-        height: 100%;
-    }}
-    .feature-card:hover {{
-        transform: translateY(-2px);
-        box-shadow: {THEME['shadow_lg']};
-        border-color: {THEME['border']};
     }}
 
-    /* INPUTS (FOCUS GLOW) */
+    /* INPUTS */
     .stTextArea textarea, .stTextInput input, .stSelectbox div[data-baseweb="select"] {{
-        border: 1px solid {THEME['border']} !important;
-        border-radius: 10px !important;
-        padding: 0.85rem !important;
-        background-color: {THEME['surface']} !important;
+        border: 2px solid {THEME['border']} !important;
+        border-radius: 8px !important;
+        padding: 0.75rem !important;
+        background-color: white !important;
         color: {THEME['text_main']} !important;
-        box-shadow: {THEME['shadow_sm']} !important;
-        transition: all 0.2s ease;
+        transition: border-color 0.2s;
     }}
     .stTextArea textarea:focus, .stTextInput input:focus {{
         border-color: {THEME['primary']} !important;
-        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15) !important; /* Indigo Glow */
+        box-shadow: none !important;
     }}
 
-    /* BUTTONS (TACTILE) */
+    /* BUTTONS */
     div.stButton > button {{
-        background: linear-gradient(180deg, {THEME['primary']} 0%, {THEME['primary_hover']} 100%) !important;
+        background-color: {THEME['text_main']} !important; /* Black Buttons */
         color: white !important;
-        border: 1px solid rgba(255,255,255,0.1) !important;
+        border: none !important;
         border-radius: 8px !important;
-        padding: 0.6rem 1.25rem !important;
-        font-weight: 500 !important;
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1), inset 0 1px 0 0 rgba(255,255,255,0.1) !important;
-        transition: transform 0.1s ease !important;
+        padding: 0.75rem 1.5rem !important;
+        font-weight: 600 !important;
+        transition: background-color 0.2s !important;
     }}
     div.stButton > button:hover {{
-        transform: translateY(-1px);
-        box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3) !important;
+        background-color: {THEME['primary']} !important; /* Orange on Hover */
+        color: white !important;
     }}
-    div.stButton > button:active {{
-        transform: translateY(0);
+    
+    /* PRIMARY BUTTON OVERRIDE */
+    div.stButton > button[kind="primary"] {{
+        background-color: {THEME['primary']} !important;
+        color: white !important;
+    }}
+    div.stButton > button[kind="primary"]:hover {{
+        background-color: {THEME['primary_hover']} !important;
     }}
 
     /* HEADER */
-    .app-header {{
-        text-align: center;
-        margin-bottom: 1rem;
+    .site-header {{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid {THEME['border']};
     }}
-    .logo {{
-        font-size: 3rem;
-        margin-bottom: 0.5rem;
-        display: inline-block;
-        background: linear-gradient(135deg, {THEME['primary']} 0%, {THEME['accent']} 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }}
-    .app-title {{
-        font-size: 2rem;
-        font-weight: 700;
-        color: {THEME['text_main']};
+    .site-title {{
+        font-size: 2.5rem;
+        font-weight: 800;
         margin: 0;
-        letter-spacing: -0.03em;
+        color: {THEME['primary']};
     }}
-    .app-subtitle {{
-        font-size: 1rem;
-        color: {THEME['text_secondary']};
-        margin-top: 0.5rem;
-    }}
-    
-    /* CHIPS / TAGS */
-    .chip {{
-        display: inline-block;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        background-color: {THEME['bg']};
-        border: 1px solid {THEME['border']};
-        color: {THEME['text_secondary']};
-        font-size: 0.75rem;
-        font-weight: 500;
-        margin-right: 0.5rem;
+    .site-subtitle {{
+        font-size: 1.2rem;
+        color: {THEME['text_main']};
+        margin-left: 1rem;
+        font-weight: 600;
     }}
     </style>
 """, unsafe_allow_html=True)
 
 # --- HELPER FUNCTIONS ---
 
-def generate_mermaid_link(mermaid_code):
-    """Generates a link to open the current code in mermaid.live"""
-    state = {
-        "code": mermaid_code,
-        "mermaid": {"theme": "default"},
-        "autoSync": True,
-        "updateDiagram": True
-    }
-    json_str = json.dumps(state)
-    compressor = zlib.compressobj(9, zlib.DEFLATED, -15, 8, zlib.Z_DEFAULT_STRATEGY)
-    compressed = compressor.compress(json_str.encode('utf-8')) + compressor.flush()
-    base64_str = base64.urlsafe_b64encode(compressed).decode('utf-8')
-    return f"https://mermaid.live/edit#{base64_str}"
-
 def get_mermaid_img(code, format="png"):
-    """Fetches the diagram image from mermaid.ink using compressed encoding."""
+    """Fetches diagram from mermaid.ink with compression."""
     state = {
         "code": code,
-        "mermaid": {"theme": "default"},
+        "mermaid": {"theme": "default", "securityLevel": "loose"},
         "autoSync": True,
         "updateDiagram": True
     }
     json_str = json.dumps(state)
-    # Use zlib compression (same as mermaid.live) to handle large diagrams
     compressor = zlib.compressobj(9, zlib.DEFLATED, -15, 8, zlib.Z_DEFAULT_STRATEGY)
     compressed = compressor.compress(json_str.encode('utf-8')) + compressor.flush()
     base64_str = base64.urlsafe_b64encode(compressed).decode('utf-8')
@@ -231,84 +188,72 @@ def get_mermaid_img(code, format="png"):
     try:
         response = requests.get(url)
         if response.status_code == 200:
-            # Verify it's actually an image
-            content_type = response.headers.get('Content-Type', '')
-            if format == "png" and "image/png" not in content_type:
-                return None
-            if format == "svg" and "image/svg" not in content_type:
-                return None
             return response.content
     except:
         return None
     return None
 
+def convert_to_jpg(image_bytes):
+    """Converts image bytes (PNG) to JPG using Pillow."""
+    try:
+        image = Image.open(io.BytesIO(image_bytes))
+        rgb_im = image.convert('RGB')
+        output = io.BytesIO()
+        rgb_im.save(output, format='JPEG', quality=95)
+        return output.getvalue()
+    except:
+        return None
+
 def create_pdf(text, image_bytes=None):
-    """Creates a PDF with text and optional image."""
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=12)
     
-    # Add Image if provided
     if image_bytes:
         import tempfile
         import os
-        
-        # Create a temp file
         with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp:
             tmp.write(image_bytes)
             tmp_path = tmp.name
-        
         try:
-            # Center image roughly
-            # A4 width is 210mm. Margins are usually 10mm.
-            # We use 190mm width.
             pdf.image(tmp_path, x=10, w=190)
             pdf.ln(10)
-        except Exception as e:
-            pdf.set_text_color(255, 0, 0)
-            pdf.cell(0, 10, f"Error embedding image: {str(e)}", ln=True)
-            pdf.set_text_color(0, 0, 0)
+        except:
+            pdf.cell(0, 10, "Image Error", ln=True)
         finally:
-            # Cleanup temp file
             if os.path.exists(tmp_path):
                 os.remove(tmp_path)
     
-    # Add Text
-    # FPDF doesn't handle markdown or utf-8 perfectly out of the box, 
-    # so we do a basic latin-1 encode/replace to prevent crashes.
     clean_text = text.encode('latin-1', 'replace').decode('latin-1')
     pdf.multi_cell(0, 10, clean_text)
-    
     return pdf.output(dest='S').encode('latin-1')
 
 def create_docx(text):
-    """Creates a DOCX file from text."""
     doc = Document()
     for line in text.split('\n'):
         doc.add_paragraph(line)
-    
     buffer = io.BytesIO()
     doc.save(buffer)
     buffer.seek(0)
     return buffer.getvalue()
 
 def validate_mermaid_code(code):
-    """Strictly validates Mermaid code against common syntax errors."""
+    """Linter for Mermaid code."""
+    errors = []
     lines = code.split('\n')
     for i, line in enumerate(lines):
-        bad_id_match = re.search(r'^(\s*)([a-zA-Z0-9_]*[^a-zA-Z0-9_\s\[]+[a-zA-Z0-9_]*)\s*\[', line)
-        if bad_id_match:
-             return False, f"Line {i+1}: Node ID '{bad_id_match.group(2)}' contains invalid characters. Use alphanumeric and underscores only."
-        label_match = re.search(r'\[(.*?)\]', line)
-        if label_match:
-            content = label_match.group(1)
-            if not content.startswith('"') and not content.endswith('"'):
-                if any(c in content for c in " ()/-"):
-                    return False, f"Line {i+1}: Label '{content}' must be double-quoted. Example: `id[\"{content}\"]`"
+        if '[' in line and ']' in line:
+            match = re.search(r'\[(.*?)\]', line)
+            if match:
+                content = match.group(1)
+                if not (content.startswith('"') and content.endswith('"')):
+                    if any(c in content for c in "()-"):
+                        errors.append(f"Line {i+1}: Label '{content}' needs quotes.")
+    if errors:
+        return False, " | ".join(errors[:3])
     return True, "Valid"
 
 def sanitize_mermaid_code(raw_text):
-    """Extracts code block and attempts to fix common issues."""
     match = re.search(r"```mermaid\s+(.*?)\s+```", raw_text, re.DOTALL)
     if match:
         code = match.group(1).strip()
@@ -318,147 +263,123 @@ def sanitize_mermaid_code(raw_text):
 
 # --- HEADER ---
 st.markdown(f"""
-    <div class="app-header">
-        <div class="logo">🦋</div>
-        <h1 class="app-title">Metamorphosis Architect</h1>
-        <p class="app-subtitle">Precision Tools for Digital Transformation</p>
+    <div class="site-header">
+        <span class="site-title">Site A-Z</span>
+        <span class="site-subtitle">AI Workspace</span>
     </div>
 """, unsafe_allow_html=True)
 
-# --- SIDEBAR (SETTINGS) ---
-with st.sidebar:
-    st.markdown("### Settings")
-    api_key = st.text_input("Gemini API Key", type="password", help="Required for AI features")
-    if not api_key:
-        st.warning("⚠️ API Key missing")
-    st.markdown("---")
-    st.caption("v5.1.0 (Enhanced Downloads)")
+# --- NAVIGATION ---
+tabs = st.tabs(["🔑 API Key", "✨ Prompt Refiner", "📊 Diagrams", "📝 Documents"])
 
-# --- TOP NAVIGATION ---
-tab_home, tab_rewriter, tab_diagram, tab_docs = st.tabs([
-    "Dashboard", 
-    "Prompt Refiner", 
-    "Diagrams", 
-    "Documents"
-])
-
-# --- TAB: DASHBOARD ---
-with tab_home:
-    st.markdown("<br>", unsafe_allow_html=True)
+# --- TAB 1: API KEY MANAGEMENT ---
+with tabs[0]:
+    st.markdown("### 🔑 API Key Management")
+    st.markdown("Enter your Google Gemini API Key to unlock the workspace.")
     
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.markdown(f"""
-            <div class="feature-card">
-                <div style="font-size: 2rem; margin-bottom: 1rem;">✨</div>
-                <h4>Prompt Refiner</h4>
-                <p>Transform vague ideas into structured, engineer-grade prompts for any context.</p>
-            </div>
-        """, unsafe_allow_html=True)
-        
-    with col2:
-        st.markdown(f"""
-            <div class="feature-card">
-                <div style="font-size: 2rem; margin-bottom: 1rem;">📊</div>
-                <h4>Diagrams</h4>
-                <p>Generate strict, error-free Mermaid.js diagrams. Visualizes flows and architectures.</p>
-            </div>
-        """, unsafe_allow_html=True)
-        
-    with col3:
-        st.markdown(f"""
-            <div class="feature-card">
-                <div style="font-size: 2rem; margin-bottom: 1rem;">📝</div>
-                <h4>Documents</h4>
-                <p>Draft professional technical documentation, specs, and manuals in seconds.</p>
-            </div>
-        """, unsafe_allow_html=True)
-
-# --- TAB: PROMPT REFINER ---
-with tab_rewriter:
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    col_rw_1, col_rw_2 = st.columns([1, 1])
-    
-    with col_rw_1:
-        st.markdown("### Input")
-        context_type = st.selectbox("Context", ["General", "Coding / Engineering", "Business / Strategy", "Creative Writing"], index=0)
-        raw_prompt = st.text_area("Draft Idea", height=250, placeholder="Describe what you want to achieve...")
-        
-        if st.button("Refine Prompt", type="primary", use_container_width=True):
-            if not api_key:
-                st.error("API Key required.")
-            elif not raw_prompt:
-                st.warning("Please enter a draft.")
+    col_key1, col_key2 = st.columns([2, 1])
+    with col_key1:
+        api_input = st.text_input("Gemini API Key", type="password", placeholder="AIzaSy...")
+        if st.button("Save & Verify Key"):
+            if not api_input:
+                st.error("Please enter a key.")
             else:
                 try:
-                    genai.configure(api_key=api_key)
+                    genai.configure(api_key=api_input)
                     model = genai.GenerativeModel("gemini-2.5-flash")
-                    
-                    system_prompt = """
-                    ROLE: Expert Prompt Engineer.
-                    GOAL: Rewrite the user's raw input into a structured, highly effective prompt for an LLM.
-                    
-                    INSTRUCTIONS:
-                    1. Analyze the user's intent and selected context.
-                    2. Add necessary structure (Context, Task, Constraints, Output Format).
-                    3. Improve clarity and remove ambiguity.
-                    4. Output ONLY the optimized prompt.
-                    """
-                    
-                    with st.spinner("Refining..."):
-                        prompt_input = f"{system_prompt}\n\nCONTEXT: {context_type}\nINPUT: {raw_prompt}"
-                        response = model.generate_content(prompt_input)
-                        st.session_state.rewritten_result = response.text
+                    response = model.generate_content("Test")
+                    st.session_state.api_key = api_input
+                    st.success("✅ Key Verified & Saved!")
                 except Exception as e:
-                    st.error(f"Error: {e}")
-
-    with col_rw_2:
-        st.markdown("### Result")
-        if "rewritten_result" in st.session_state:
-            st.text_area("Optimized Prompt", value=st.session_state.rewritten_result, height=335)
-        else:
-            st.info("Your refined prompt will appear here.")
-
-# --- TAB: DIAGRAMS ---
-with tab_diagram:
-    st.markdown("<br>", unsafe_allow_html=True)
+                    st.error(f"❌ Invalid Key: {e}")
     
-    col_d_input, col_d_preview = st.columns([1, 2])
+    if "api_key" in st.session_state:
+        st.info(f"Active Key: {st.session_state.api_key[:5]}... (Stored in Session)")
+    else:
+        st.warning("⚠️ No active API Key. Features will be locked.")
+
+# --- TAB 2: PROMPT REFINER ---
+with tabs[1]:
+    st.markdown("### ✨ Advanced Prompt Refiner")
     
-    with col_d_input:
-        st.markdown("### Configuration")
-        diagram_type = st.selectbox("Type", ["Flowchart (TD)", "Sequence Diagram", "ER Diagram", "State Diagram", "Gantt Chart"])
-        diagram_prompt = st.text_area("Requirements", height=200, placeholder="Paste your refined prompt here...")
+    col_ref1, col_ref2 = st.columns([1, 1])
+    
+    with col_ref1:
+        st.markdown("#### Configuration")
+        context = st.selectbox("Context", [
+            "General", "Software Engineering", "Data Science", "Legal", "Medical", 
+            "Academic Writing", "Creative Writing", "Business Strategy", "Marketing", "HR"
+        ])
+        tone = st.select_slider("Tone", options=["Casual", "Neutral", "Professional", "Academic"])
+        complexity = st.slider("Complexity Level", 1, 10, 7)
         
-        if st.button("Generate Diagram", type="primary", use_container_width=True):
-            if not api_key:
-                st.error("API Key required.")
+        raw_prompt = st.text_area("Draft Prompt", height=200, placeholder="Enter your rough idea here...")
+        
+        if st.button("Refine Prompt", type="primary"):
+            if "api_key" not in st.session_state:
+                st.error("Please set your API Key first.")
+            elif not raw_prompt:
+                st.warning("Enter a draft prompt.")
             else:
                 try:
-                    genai.configure(api_key=api_key)
-                    system_instruction = f"""
-                    ROLE: Senior Solutions Architect. GOAL: Generate valid Mermaid.js {diagram_type}.
-                    RULES: 1. Alphanumeric IDs only (No spaces). 2. Double-quote all labels. 3. Output only code.
+                    genai.configure(api_key=st.session_state.api_key)
+                    model = genai.GenerativeModel("gemini-2.5-flash")
+                    sys_prompt = f"""
+                    ROLE: Expert Prompt Engineer.
+                    GOAL: Refine the user's prompt for maximum LLM performance.
+                    CONTEXT: {context}. TONE: {tone}. COMPLEXITY: {complexity}/10.
+                    RULES:
+                    1. Remove all markdown bolding (no **text**).
+                    2. Structure with clear headers (Context, Task, Constraints).
+                    3. Be precise and concise.
                     """
-                    model = genai.GenerativeModel("gemini-2.5-flash", system_instruction=system_instruction)
-                    with st.spinner("Generating..."):
-                        response = model.generate_content(f"REQUIREMENTS: {diagram_prompt}")
-                        clean_code = sanitize_mermaid_code(response.text)
-                        is_valid, msg = validate_mermaid_code(clean_code)
-                        
-                        st.session_state.generated_mermaid = clean_code
-                        if not is_valid:
-                            st.warning(f"⚠️ Syntax Warning: {msg}")
-                        else:
-                            st.success("Generated successfully.")
+                    with st.spinner("Refining..."):
+                        res = model.generate_content(f"{sys_prompt}\nINPUT: {raw_prompt}")
+                        st.session_state.refined_prompt = res.text.replace("**", "") # Strip bolding
                 except Exception as e:
                     st.error(f"Error: {e}")
 
-    with col_d_preview:
-        st.markdown("### Preview")
-        if "generated_mermaid" in st.session_state:
+    with col_ref2:
+        st.markdown("#### Refined Output")
+        if "refined_prompt" in st.session_state:
+            st.text_area("Result", value=st.session_state.refined_prompt, height=400)
+        else:
+            st.info("Output will appear here.")
+
+# --- TAB 3: DIAGRAMS ---
+with tabs[2]:
+    st.markdown("### 📊 Diagram Generator")
+    
+    col_diag1, col_diag2 = st.columns([1, 2])
+    
+    with col_diag1:
+        d_type = st.selectbox("Diagram Type", ["Flowchart", "Sequence", "Class", "State", "ER Diagram", "Gantt", "Mindmap", "Pie Chart"])
+        d_reqs = st.text_area("Requirements", height=200, placeholder="Describe the diagram...")
+        
+        if st.button("Generate Diagram", type="primary"):
+            if "api_key" not in st.session_state:
+                st.error("Set API Key first.")
+            else:
+                try:
+                    genai.configure(api_key=st.session_state.api_key)
+                    sys_prompt = f"""
+                    ROLE: Mermaid.js Expert. GOAL: Valid code for {d_type}.
+                    RULES:
+                    1. Quote ALL labels with spaces: id["Label Text"].
+                    2. Escape parentheses in labels: "Text (Info)" -> "Text [Info]".
+                    3. ER: Use `||--o{{` syntax.
+                    4. Gantt: `YYYY-MM-DD`.
+                    OUTPUT: Code block only.
+                    """
+                    with st.spinner("Generating..."):
+                        res = model.generate_content(f"{sys_prompt}\nREQ: {d_reqs}")
+                        code = sanitize_mermaid_code(res.text)
+                        st.session_state.mermaid_code = code
+                except Exception as e:
+                    st.error(f"Error: {e}")
+
+    with col_diag2:
+        if "mermaid_code" in st.session_state:
             st.components.v1.html(
                 f"""
                 <script type="module">
@@ -466,78 +387,73 @@ with tab_diagram:
                     mermaid.initialize({{ startOnLoad: true }});
                 </script>
                 <div class="mermaid" style="display: flex; justify-content: center;">
-                    {st.session_state.generated_mermaid}
+                    {st.session_state.mermaid_code}
                 </div>
                 """,
-                height=400,
+                height=500,
                 scrolling=True
             )
             
-            # --- DOWNLOAD OPTIONS ---
+            # Downloads
             st.markdown("#### Downloads")
-            d_col1, d_col2, d_col3 = st.columns(3)
+            dc1, dc2, dc3, dc4 = st.columns(4)
             
-            # Fetch Images
-            png_data = get_mermaid_img(st.session_state.generated_mermaid, "png")
-            svg_data = get_mermaid_img(st.session_state.generated_mermaid, "svg")
+            png_bytes = get_mermaid_img(st.session_state.mermaid_code, "png")
+            svg_bytes = get_mermaid_img(st.session_state.mermaid_code, "svg")
             
-            with d_col1:
-                if png_data:
-                    st.download_button("Download PNG", png_data, "diagram.png", "image/png", use_container_width=True)
-            with d_col2:
-                if svg_data:
-                    st.download_button("Download SVG", svg_data, "diagram.svg", "image/svg+xml", use_container_width=True)
-            with d_col3:
-                if png_data:
-                    pdf_data = create_pdf("Diagram Export", png_data)
-                    st.download_button("Download PDF", pdf_data, "diagram.pdf", "application/pdf", use_container_width=True)
+            with dc1:
+                if png_bytes: st.download_button("PNG", png_bytes, "diag.png", "image/png", use_container_width=True)
+            with dc2:
+                if png_bytes:
+                    jpg_bytes = convert_to_jpg(png_bytes)
+                    if jpg_bytes: st.download_button("JPG", jpg_bytes, "diag.jpg", "image/jpeg", use_container_width=True)
+            with dc3:
+                if svg_bytes: st.download_button("SVG", svg_bytes, "diag.svg", "image/svg+xml", use_container_width=True)
+            with dc4:
+                if png_bytes:
+                    pdf_bytes = create_pdf("Diagram", png_bytes)
+                    st.download_button("PDF", pdf_bytes, "diag.pdf", "application/pdf", use_container_width=True)
+            
+            with st.expander("Source Code"):
+                st.code(st.session_state.mermaid_code, language="mermaid")
 
-            with st.expander("View Source Code"):
-                st.code(st.session_state.generated_mermaid, language="mermaid")
-            
-            live_url = generate_mermaid_link(st.session_state.generated_mermaid)
-            st.link_button("Open in Mermaid.live", live_url)
-
-# --- TAB: DOCUMENTS ---
-with tab_docs:
-    st.markdown("<br>", unsafe_allow_html=True)
+# --- TAB 4: DOCUMENTS ---
+with tabs[3]:
+    st.markdown("### 📝 Professional Documents")
     
-    st.markdown("### Document Generator")
+    col_doc1, col_doc2 = st.columns([1, 2])
     
-    col_doc_1, col_doc_2 = st.columns([1, 2])
-    
-    with col_doc_1:
-        doc_type = st.selectbox("Type", ["Business Requirement Doc (BRD)", "Technical Design Doc (TDD)", "API Specification"])
-        doc_prompt = st.text_area("Details", height=200, placeholder="Describe the project...")
+    with col_doc1:
+        doc_type = st.text_input("Document Type", placeholder="e.g. BRD, User Manual, API Spec...")
+        doc_details = st.text_area("Content Details", height=300)
         
-        if st.button("Generate Document", type="primary", use_container_width=True):
-            if not api_key:
-                st.error("API Key required.")
+        if st.button("Generate Document", type="primary"):
+            if "api_key" not in st.session_state:
+                st.error("Set API Key first.")
+            elif not doc_type:
+                st.warning("Enter a document type.")
             else:
                 try:
-                    genai.configure(api_key=api_key)
-                    model = genai.GenerativeModel("gemini-2.5-flash")
-                    with st.spinner("Drafting..."):
-                        response = model.generate_content(f"Write a professional {doc_type} for: {doc_prompt}. Use Markdown.")
-                        st.session_state.generated_doc = response.text
+                    genai.configure(api_key=st.session_state.api_key)
+                    sys_prompt = "ROLE: Technical Writer. OUTPUT: Professional Markdown. NO conversational filler."
+                    with st.spinner("Writing..."):
+                        res = model.generate_content(f"{sys_prompt}\nTYPE: {doc_type}\nDETAILS: {doc_details}")
+                        st.session_state.doc_content = res.text
                 except Exception as e:
                     st.error(f"Error: {e}")
 
-    with col_doc_2:
-        if "generated_doc" in st.session_state:
-            st.markdown("#### Downloads")
-            doc_col1, doc_col2, doc_col3 = st.columns(3)
-            
-            with doc_col1:
-                st.download_button("Download MD", st.session_state.generated_doc, "document.md", use_container_width=True)
-            
-            with doc_col2:
-                docx_data = create_docx(st.session_state.generated_doc)
-                st.download_button("Download DOCX", docx_data, "document.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", use_container_width=True)
-            
-            with doc_col3:
-                pdf_doc_data = create_pdf(st.session_state.generated_doc)
-                st.download_button("Download PDF", pdf_doc_data, "document.pdf", "application/pdf", use_container_width=True)
-
+    with col_doc2:
+        if "doc_content" in st.session_state:
+            st.markdown("#### Preview")
+            st.markdown(st.session_state.doc_content)
             st.markdown("---")
-            st.markdown(st.session_state.generated_doc)
+            
+            dl1, dl2, dl3 = st.columns(3)
+            with dl1:
+                st.download_button("Download MD", st.session_state.doc_content, "doc.md", use_container_width=True)
+            with dl2:
+                docx = create_docx(st.session_state.doc_content)
+                st.download_button("Download DOCX", docx, "doc.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", use_container_width=True)
+            with dl3:
+                pdf = create_pdf(st.session_state.doc_content)
+                st.download_button("Download PDF", pdf, "doc.pdf", "application/pdf", use_container_width=True)
