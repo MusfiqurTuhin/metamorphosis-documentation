@@ -197,10 +197,87 @@ st.markdown(f"""
     h1, h2, h3, h4 {{
         font-family: 'Poppins', sans-serif !important;
         font-weight: 700;
+        color: {THEME['text_main']} !important;
+    }}
+    
+    p, span, label, div {{
+        color: {THEME['text_main']} !important;
     }}
     
     .bangla-text {{
         font-family: 'Tiro Bangla', serif !important;
+        color: {THEME['text_main']} !important;
+    }}
+
+    /* Fix all text inputs and text areas */
+    .stTextInput > div > div > input {{
+        background-color: {THEME['surface']} !important;
+        color: {THEME['text_main']} !important;
+        border: 2px solid {THEME['border']} !important;
+    }}
+    
+    .stTextArea > div > div > textarea {{
+        background-color: {THEME['surface']} !important;
+        color: {THEME['text_main']} !important;
+        border: 2px solid {THEME['border']} !important;
+    }}
+    
+    /* Fix selectbox */
+    .stSelectbox > div > div {{
+        background-color: {THEME['surface']} !important;
+        color: {THEME['text_main']} !important;
+    }}
+    
+    /* Fix all dropdown text */
+    [data-baseweb="select"] span {{
+        color: {THEME['text_main']} !important;
+    }}
+    
+    /* Fix slider labels and values */
+    .stSlider > div > div > div {{
+        color: {THEME['text_main']} !important;
+    }}
+    
+    /* Fix checkbox and radio labels */
+    .stCheckbox label, .stRadio label {{
+        color: {THEME['text_main']} !important;
+    }}
+    
+    /* Fix markdown text */
+    .stMarkdown {{
+        color: {THEME['text_main']} !important;
+    }}
+    
+    /* Fix code blocks */
+    code {{
+        background-color: #F5F5F5 !important;
+        color: {THEME['text_main']} !important;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }}
+    
+    pre {{
+        background-color: #F5F5F5 !important;
+        color: {THEME['text_main']} !important;
+    }}
+    
+    /* Fix info/warning/error boxes */
+    .stAlert {{
+        color: {THEME['text_main']} !important;
+    }}
+    
+    /* Fix expander text */
+    .streamlit-expanderHeader {{
+        color: {THEME['text_main']} !important;
+    }}
+    
+    /* Fix captions */
+    .caption {{
+        color: {THEME['text_secondary']} !important;
+    }}
+    
+    small {{
+        color: {THEME['text_secondary']} !important;
     }}
 
     .stTabs [data-baseweb="tab-list"] {{
@@ -213,7 +290,7 @@ st.markdown(f"""
     .stTabs [data-baseweb="tab"] {{
         background: rgba(255,255,255,0.2);
         backdrop-filter: blur(10px);
-        color: white;
+        color: white !important;
         font-weight: 600;
         border-radius: 12px;
         padding: 0.75rem 1.5rem;
@@ -233,12 +310,81 @@ st.markdown(f"""
         font-weight: 600 !important;
     }}
     
+    div.stButton > button {{
+        background-color: {THEME['text_main']} !important;
+        color: white !important;
+        border-radius: 12px !important;
+        padding: 0.85rem 1.75rem !important;
+        font-weight: 600 !important;
+    }}
+    
+    div.stButton > button:hover {{
+        opacity: 0.9;
+    }}
+    
     .success-box {{
         background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
         border-left: 4px solid {THEME['success']};
         padding: 1rem;
         border-radius: 8px;
         margin: 1rem 0;
+        color: {THEME['text_main']} !important;
+    }}
+    
+    /* Fix download buttons */
+    .stDownloadButton > button {{
+        background-color: {THEME['text_main']} !important;
+        color: white !important;
+    }}
+    
+    /* Ensure all widget labels are visible */
+    label {{
+        color: {THEME['text_main']} !important;
+        font-weight: 500 !important;
+    }}
+    
+    /* Fix number input */
+    .stNumberInput input {{
+        background-color: {THEME['surface']} !important;
+        color: {THEME['text_main']} !important;
+    }}
+    
+    /* Fix multiselect */
+    .stMultiSelect {{
+        color: {THEME['text_main']} !important;
+    }}
+    
+    .stMultiSelect > div {{
+        background-color: {THEME['surface']} !important;
+    }}
+    
+    /* Fix sidebar text */
+    .css-1d391kg, [data-testid="stSidebar"] {{
+        background-color: {THEME['surface']} !important;
+    }}
+    
+    [data-testid="stSidebar"] * {{
+        color: {THEME['text_main']} !important;
+    }}
+    
+    /* Fix metric values */
+    [data-testid="stMetricValue"] {{
+        color: {THEME['text_main']} !important;
+    }}
+    
+    /* Fix all container text */
+    [data-testid="stVerticalBlock"] {{
+        color: {THEME['text_main']} !important;
+    }}
+    
+    /* Override Streamlit defaults */
+    .stApp * {{
+        color: inherit;
+    }}
+    
+    /* Ensure form labels are visible */
+    .stForm label {{
+        color: {THEME['text_main']} !important;
     }}
     </style>
 """, unsafe_allow_html=True)
