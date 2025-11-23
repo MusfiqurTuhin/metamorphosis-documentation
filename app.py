@@ -354,7 +354,7 @@ with tabs[2]:
     
     with col_diag1:
         d_type = st.selectbox("Diagram Type", ["Flowchart", "Sequence", "Class", "State", "ER Diagram", "Gantt", "Mindmap", "Pie Chart"])
-        d_reqs = st.text_area("Requirements", height=200, placeholder="Describe the diagram...")
+        d_reqs = st.text_area("Requirements (Messy Text OK)", height=200, placeholder="Describe the diagram in any format...")
         
         if st.button("Generate Diagram", type="primary"):
             if "api_key" not in st.session_state:
@@ -362,6 +362,7 @@ with tabs[2]:
             else:
                 try:
                     genai.configure(api_key=st.session_state.api_key)
+                    model = genai.GenerativeModel("gemini-2.5-flash")
                     sys_prompt = f"""
                     ROLE: Mermaid.js Expert. GOAL: Valid code for {d_type}.
                     RULES:
@@ -375,6 +376,7 @@ with tabs[2]:
                         res = model.generate_content(f"{sys_prompt}\nREQ: {d_reqs}")
                         code = sanitize_mermaid_code(res.text)
                         st.session_state.mermaid_code = code
+                        st.success("✅ Diagram Generated!")
                 except Exception as e:
                     st.error(f"Error: {e}")
 
@@ -424,21 +426,42 @@ with tabs[3]:
     col_doc1, col_doc2 = st.columns([1, 2])
     
     with col_doc1:
-        doc_type = st.text_input("Document Type", placeholder="e.g. BRD, User Manual, API Spec...")
-        doc_details = st.text_area("Content Details", height=300)
+        doc_type = st.selectbox("Document Type", [
+            "Business Requirements Document (BRD)",
+            "Technical Design Document (TDD)",
+            "API Specification",
+            "User Manual",
+            "Project Charter",
+            "Standard Operating Procedure (SOP)",
+            "Meeting Minutes",
+            "Research Report",
+            "Other (Specify Below)"
+        ])
+        
+        # Show text input only if "Other" is selected
+        custom_doc_type = ""
+        if doc_type == "Other (Specify Below)":
+            custom_doc_type = st.text_input("Specify Document Type", placeholder="e.g., Recipe Book, Travel Guide...")
+            final_doc_type = custom_doc_type if custom_doc_type else "Custom Document"
+        else:
+            final_doc_type = doc_type
+        
+        doc_details = st.text_area("Content Details", height=300, placeholder="Describe what the document should contain...")
         
         if st.button("Generate Document", type="primary"):
             if "api_key" not in st.session_state:
                 st.error("Set API Key first.")
-            elif not doc_type:
-                st.warning("Enter a document type.")
+            elif not doc_details:
+                st.warning("Enter content details.")
             else:
                 try:
                     genai.configure(api_key=st.session_state.api_key)
+                    model = genai.GenerativeModel("gemini-2.5-flash")
                     sys_prompt = "ROLE: Technical Writer. OUTPUT: Professional Markdown. NO conversational filler."
                     with st.spinner("Writing..."):
-                        res = model.generate_content(f"{sys_prompt}\nTYPE: {doc_type}\nDETAILS: {doc_details}")
+                        res = model.generate_content(f"{sys_prompt}\nTYPE: {final_doc_type}\nDETAILS: {doc_details}")
                         st.session_state.doc_content = res.text
+                        st.success("✅ Document Generated!")
                 except Exception as e:
                     st.error(f"Error: {e}")
 
