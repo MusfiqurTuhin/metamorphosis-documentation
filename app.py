@@ -550,7 +550,7 @@ with tabs[5]:
             extract_info = st.multiselect("Extract", ["Names", "Dates", "Numbers", "Locations"])
             multilingual = st.checkbox("Multi-language Support")
         
-        text_to_summarize = st.text_area("Text", height=350)
+        text_to_summarize = st.text_area("Text to Summarize", height=350, key="summarize_input")
         word_count = len(text_to_summarize.split())
         st.caption(f"📊 {word_count} words → ~{int(word_count * compression / 100)} words")
         
@@ -588,7 +588,7 @@ with tabs[6]:
             formality = st.select_slider("Formality", ["Casual", "Neutral", "Formal"])
             preserve_format = st.checkbox("Preserve Formatting", value=True)
         
-        text_to_translate = st.text_area("Text", height=350)
+        text_to_translate = st.text_area("Text to Translate", height=350, key="translate_input")
         
         if st.button("🌐 Translate", type="primary"):
             if "api_key" in st.session_state:
@@ -607,7 +607,7 @@ with tabs[6]:
     with col2:
         if "translation" in st.session_state:
             st.markdown(f"#### 🎯 {target_lang}")
-            st.text_area("Result", st.session_state.translation, height=400)
+            st.text_area("Result", st.session_state.translation, height=400, key="translate_output")
             st.download_button("📥 Download", st.session_state.translation, f"translation_{target_lang.lower()}.txt")
 
 # === TAB 8: EMAIL WRITER ===
@@ -645,7 +645,7 @@ with tabs[7]:
     with col2:
         if "email_draft" in st.session_state:
             st.markdown("#### 📨 Draft")
-            st.text_area("Email", st.session_state.email_draft, height=500)
+            st.text_area("Email", st.session_state.email_draft, height=500, key="email_output")
             st.download_button("📥 Download", st.session_state.email_draft, "email.txt")
 
 # === TAB 9: CONTENT ANALYZER ===
@@ -660,7 +660,7 @@ with tabs[8]:
             check_grammar = st.checkbox("Grammar Check")
             check_seo = st.checkbox("SEO Analysis")
         
-        text_to_analyze = st.text_area("Content", height=400)
+        text_to_analyze = st.text_area("Content to Analyze", height=400, key="analyze_input")
         
         if st.button("🔍 Analyze", type="primary"):
             if "api_key" in st.session_state:
