@@ -10,6 +10,7 @@ from docx import Document
 import io
 from PIL import Image
 from datetime import datetime
+import ui.tabs as ui
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(
@@ -359,6 +360,9 @@ with col_title:
     st.caption("🚀 Advanced AI-Powered Documentation & Development Suite")
 
 st.markdown("---")
+
+# Render the application tabs
+ui.render_tabs()
 
 # --- FOOTER ---
 st.markdown("---")
