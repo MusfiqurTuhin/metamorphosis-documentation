@@ -15,45 +15,50 @@ from services.gemini_client import GeminiClient
 
 def _render_api_tab():
     st.markdown("### 🔑 API Key Management")
-    st.info("ℹ️ The system uses a default API key. You can override it with your own key below.")
+    st.warning("⚠️ You must provide your own Google Gemini API Key to use this application.")
     
-    api_input = st.text_input("Gemini API Key", type="password")
+    api_input = st.text_input("Gemini API Key", type="password", placeholder="Enter your API key here...")
     if st.button("💾 Save & Verify", type="primary"):
         if api_input:
             client = GeminiClient(user_api_key=api_input)
             # Try a simple generation to verify
             res = client.generate_content("Test")
-            if "Error" not in res and "Quota" not in res:
+            if "Error" not in res and "Quota" not in res and res.strip():
                 st.session_state.api_key = api_input
                 st.success("✅ Verified & Saved!")
             else:
-                st.error(res)
+                st.error("❌ Invalid API Key or verification failed. Please check your key.")
+        else:
+            st.error("❌ Please enter an API key.")
     
     if "api_key" in st.session_state:
-        st.success(f"Active User Key: {st.session_state.api_key[:8]}…")
-    else:
-        st.info("Using System Default Key")
+        st.success(f"✅ Active Key: {st.session_state.api_key[:12]}...")
 
-    # Bengali User Manual for API Key Creation
-    with st.expander("📘 কীভাবে Google AI Studio থেকে API Key তৈরি করবেন (বাংলা নির্দেশিকা)"):
-        st.markdown("""
-        <div class="bangla-text" style="padding: 1rem; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef;">
-            <h4 style="color: #FF5A36;">Google AI Studio API Key তৈরির ধাপসমূহ:</h4>
-            <ol>
-                <li>প্রথমে <a href="https://aistudio.google.com/" target="_blank" style="color: #FF5A36; font-weight: bold;">Google AI Studio</a> ওয়েবসাইটে যান।</li>
-                <li>আপনার Google অ্যাকাউন্ট দিয়ে সাইন ইন করুন।</li>
-                <li>বাম পাশের মেনু থেকে <b>"Get API key"</b> বাটনে ক্লিক করুন।</li>
-                <li><b>"Create API key"</b> বাটনে ক্লিক করুন।</li>
-                <li>আপনার যদি কোনো প্রজেক্ট না থাকে, তবে <b>"Create API key in new project"</b> সিলেক্ট করুন।</li>
-                <li>কিছুক্ষণ অপেক্ষা করুন, একটি পপ-আপ উইন্ডোতে আপনার নতুন API Key দেখতে পাবেন।</li>
-                <li><b>"Copy"</b> বাটনে ক্লিক করে Key-টি কপি করুন।</li>
-                <li>এবার এই অ্যাপের <b>"Gemini API Key"</b> বক্সে পেস্ট করে <b>"Save & Verify"</b> বাটনে ক্লিক করুন।</li>
-            </ol>
-            <p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
-                <i>দ্রষ্টব্য: Google AI Studio-তে API Key তৈরি করা সম্পূর্ণ বিনামূল্যে (Free Tier ব্যবহারকারীদের জন্য)।</i>
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
+    st.markdown("---")
+    
+    # Bengali User Manual for API Key Creation (using st.info for guaranteed visibility)
+    st.markdown("### 📘 কীভাবে Google AI Studio থেকে API Key তৈরি করবেন")
+    st.info("""
+**Google AI Studio API Key তৈরির ধাপসমূহ:**
+
+১. প্রথমে Google AI Studio (https://aistudio.google.com/) ওয়েবসাইটে যান।
+
+২. আপনার Google অ্যাকাউন্ট দিয়ে সাইন ইন করুন।
+
+৩. বাম পাশের মেনু থেকে "Get API key" বাটনে ক্লিক করুন।
+
+৪. "Create API key" বাটনে ক্লিক করুন।
+
+৫. আপনার যদি কোনো প্রজেক্ট না থাকে, তবে "Create API key in new project" সিলেক্ট করুন।
+
+৬. কিছুক্ষণ অপেক্ষা করুন, একটি পপ-আপ উইন্ডোতে আপনার নতুন API Key দেখতে পাবেন।
+
+৭. "Copy" বাটনে ক্লিক করে Key-টি কপি করুন।
+
+৮. এবার এই অ্যাপের "Gemini API Key" বক্সে পেস্ট করে "Save & Verify" বাটনে ক্লিক করুন।
+
+**দ্রষ্টব্য:** Google AI Studio-তে API Key তৈরি করা সম্পূর্ণ বিনামূল্যে (Free Tier ব্যবহারকারীদের জন্য)।
+    """)
 
 def _render_prompt_refiner_tab():
     st.markdown("### ✨ Prompt Refiner")
@@ -140,36 +145,6 @@ def _render_document_generator_tab():
             st.download_button("📥 DOCX", helpers.create_docx(st.session_state.doc_content), "document.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", use_container_width=True)
         with dl3:
             st.download_button("📥 PDF", helpers.create_pdf(st.session_state.doc_content), "document.pdf", "application/pdf", use_container_width=True)
-        # Google Docs export
-        st.markdown("#### 📄 Export to Google Docs")
-        col_a, col_b = st.columns([2, 1])
-        with col_a:
-            st.text_area("Step 1: Select All (Ctrl+A) and Copy (Ctrl+C):", st.session_state.doc_content, height=120, key="gdocs_export_area")
-        with col_b:
-            st.markdown("""
-            <a href="https://docs.google.com/document/create" target="_blank">
-                <button style="
-                    width: 100%;
-                    padding: 1.25rem;
-                    background: linear-gradient(135deg, #4285F4 0%, #34A853 100%);
-                    color: white;
-                    border: none;
-                    border-radius: 12px;
-                    font-weight: 600;
-                    font-size: 1.1rem;
-                    cursor: pointer;
-                    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-                    transition: all 0.3s ease;
-                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(0,0,0,0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.2)';">
-                    📄 Open Google Docs
-                </button>
-            </a>
-            <p style="font-size: 0.85rem; color: #666; margin-top: 0.75rem; text-align: center;">
-                Then paste (Ctrl+V or Cmd+V)
-            </p>
-            """, unsafe_allow_html=True)
-        st.info("💡 Quick tip: After copying, the Google Docs button opens a new document where you can paste immediately!")
-        st.download_button("📄 Download as TXT (for Google Docs import)", st.session_state.doc_content, "document.txt", "text/plain", use_container_width=True)
 
 def _render_diagram_generator_tab():
     st.markdown("### 📊 Diagram Generator")
@@ -226,17 +201,17 @@ def _render_code_generator_tab():
         language = st.selectbox("Language", ["Python", "JavaScript", "TypeScript", "Java", "C++", "Go"])
         framework = st.selectbox("Framework", ["None"] + list(st.session_state.get('CODE_FRAMEWORKS', {}).get(language, [])))
         style = st.selectbox("Style", ["OOP", "Functional", "Procedural"])
-        if st.checkbox("Show Advanced Options"):
+        show_advanced = st.checkbox("Show Advanced Options")
+        if show_advanced:
             include_docs = st.checkbox("Include Documentation", True)
             include_types = st.checkbox("Include Type Hints", True)
             include_tests = st.checkbox("Generate Unit Tests")
-            include_deps = st.checkbox("Generate Dependencies")
         code_req = st.text_area("Requirements", height=250)
     with col2:
         if st.button("⚡ Generate", type="primary"):
             client = GeminiClient(st.session_state.get("api_key"))
             sys_prompt = f"Generate {language} code. Framework: {framework}. Style: {style}."
-            if st.checkbox("Show Advanced Options"):
+            if show_advanced:
                 if include_docs:
                     sys_prompt += " Include docs."
                 if include_types:
@@ -250,7 +225,7 @@ def _render_code_generator_tab():
                 st.session_state.generated_code = res
                 helpers.add_to_history(st, "Code", st.session_state.generated_code, f"{language} code")
                 
-                if st.checkbox("Show Advanced Options") and include_tests:
+                if show_advanced and include_tests:
                     test_res = client.generate_content(f"Generate unit tests for:\n{res}")
                     if "⚠️" not in test_res and "❌" not in test_res:
                         st.session_state.generated_tests = test_res
@@ -269,7 +244,8 @@ def _render_summarizer_tab():
     with col1:
         compression = st.slider("Compression Ratio", 10, 90, 50)
         format_type = st.selectbox("Format", ["Paragraph", "Bullet Points", "Key Points"])
-        if st.checkbox("Show Advanced Options"):
+        show_advanced = st.checkbox("Show Advanced Options")
+        if show_advanced:
             extract_info = st.multiselect("Extract", ["Names", "Dates", "Numbers", "Locations"])
             multilingual = st.checkbox("Multi‑language Support")
         text = st.text_area("Text to Summarize", height=350)
@@ -295,7 +271,8 @@ def _render_translator_tab():
     col1, col2 = st.columns(2)
     with col1:
         target_lang = st.selectbox("Target Language", ["Spanish", "French", "German", "Chinese", "Japanese", "Korean", "Arabic", "Hindi", "Bengali", "Portuguese", "Russian", "Italian"])
-        if st.checkbox("Show Advanced Options"):
+        show_advanced = st.checkbox("Show Advanced Options")
+        if show_advanced:
             formality = st.select_slider("Formality", ["Casual", "Neutral", "Formal"])
             preserve_format = st.checkbox("Preserve Formatting", True)
         text = st.text_area("Text to Translate", height=300)
@@ -303,7 +280,7 @@ def _render_translator_tab():
         if st.button("🚀 Translate", type="primary"):
             client = GeminiClient(st.session_state.get("api_key"))
             sys_prompt = f"Translate to {target_lang}."
-            if st.checkbox("Show Advanced Options"):
+            if show_advanced:
                 sys_prompt += f" Formality: {formality}."
             res = client.generate_content(f"{sys_prompt}\n{text}")
             
@@ -348,7 +325,8 @@ def _render_analyzer_tab():
     st.markdown("### 🔍 Content Analyzer")
     col1, col2 = st.columns(2)
     with col1:
-        if st.checkbox("Show Advanced Options"):
+        show_advanced = st.checkbox("Show Advanced Options")
+        if show_advanced:
             depth = st.select_slider("Analysis Depth", ["Quick", "Standard", "Comprehensive"])
             grammar = st.checkbox("Grammar Check")
             seo = st.checkbox("SEO Analysis")
@@ -357,7 +335,7 @@ def _render_analyzer_tab():
         if st.button("🔍 Analyze", type="primary"):
             client = GeminiClient(st.session_state.get("api_key"))
             sys_prompt = "Analyze readability, sentiment, keywords, word/sentence count."
-            if st.checkbox("Show Advanced Options"):
+            if show_advanced:
                 if grammar:
                     sys_prompt += " Include grammar check."
                 if seo:
@@ -382,7 +360,8 @@ def _render_quiz_generator_tab():
         q_type = st.selectbox("Type", ["MCQ", "True/False", "Short Answer", "Mixed"])
         num_q = st.slider("Number of Questions", 5, 30, 10)
         difficulty = st.select_slider("Difficulty", ["Easy", "Medium", "Hard"])
-        if st.checkbox("Show Advanced Options"):
+        show_advanced = st.checkbox("Show Advanced Options")
+        if show_advanced:
             include_answers = st.checkbox("Include Answer Key", True)
             randomize = st.checkbox("Randomize Order")
             points = st.number_input("Points per Question", 1, 10, 1)
@@ -391,7 +370,7 @@ def _render_quiz_generator_tab():
         if st.button("🎯 Generate", type="primary"):
             client = GeminiClient(st.session_state.get("api_key"))
             sys_prompt = f"Create {num_q} {q_type} questions. Difficulty: {difficulty}."
-            if st.checkbox("Show Advanced Options") and include_answers:
+            if show_advanced and include_answers:
                 sys_prompt += " Include answer key."
             res = client.generate_content(f"{sys_prompt}\n{topic}")
             

@@ -9,15 +9,17 @@ import google.generativeai as genai
 import streamlit as st
 from google.api_core import exceptions
 
-# Default API Key provided by system requirements
-DEFAULT_API_KEY = "AIzaSyAgFG1ndRCPfegDZXJy5Xx-S3y6YFgXESk"
+import google.generativeai as genai
+import streamlit as st
+from google.api_core import exceptions
 
 class GeminiClient:
     def __init__(self, user_api_key=None):
-        """Initialize with user key or fallback to default."""
-        self.api_key = user_api_key if user_api_key else DEFAULT_API_KEY
-        self.is_default = user_api_key is None
-        self._configure()
+        """Initialize with user key."""
+        self.api_key = user_api_key
+        self.is_default = False # No default key anymore
+        if self.api_key:
+            self._configure()
 
     def _configure(self):
         """Configure the genai library."""

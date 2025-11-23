@@ -31,19 +31,20 @@ if 'user_prefs' not in st.session_state:
         'show_advanced': False
     }
 
-# --- THEME CONFIGURATION (Brand Colors) ---
+# --- THEME CONFIGURATION (Modern Orange/Black/White) ---
 THEME = {
-    "primary": "#FF5A36",        # Vermilion / Action Orange
-    "primary_dark": "#E04828",   # Darker shade for hover
-    "accent": "#FF5A36",         # Same as primary for consistency
+    "primary": "#FF5A36",        # Vibrant Orange
+    "primary_dark": "#E04828",   # Darker Orange for hover
+    "accent": "#FF8C42",         # Lighter Orange accent
     "success": "#10B981",        # Emerald (keep for success states)
-    "bg": "#E5E6DA",             # Warm Linen
-    "surface": "#FFFFFF",        # White
-    "text_main": "#000000",      # Black
-    "text_secondary": "#333333", # Dark Gray
-    "border": "#000000",         # Black border for high contrast
-    "shadow": "0 4px 0px 0px rgba(0,0,0,1)", # Brutalist/Neo-SaaS hard shadow
-    "shadow_lg": "0 8px 0px 0px rgba(0,0,0,1)",
+    "bg": "#000000",             # Black background
+    "surface": "#1A1A1A",        # Dark gray for cards
+    "text_main": "#FFFFFF",      # White for text
+    "text_secondary": "#CCCCCC", # Light gray for secondary text  
+    "border": "#FF5A36",         # Orange borders
+    "shadow": "0 8px 32px rgba(255, 90, 54, 0.3)",
+    "shadow_lg": "0 16px 48px rgba(255, 90, 54, 0.4)",
+    "box_shadow_hover": "0 12px 40px rgba(255, 90, 54, 0.5)"
 }
 
 # --- TEMPLATES ---
@@ -178,7 +179,7 @@ def sanitize_mermaid_code(raw_text):
 # --- CUSTOM CSS ---
 st.markdown(f"""
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700&family=Playfair+Display:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
         :root {{
             --primary: {THEME['primary']};
@@ -194,1050 +195,170 @@ st.markdown(f"""
         }}
 
         /* Global Font Settings */
-        html, body, [class*="css"] {{
-            font-family: 'Playfair Display', serif;
+        html, body, [class*="css"], .stMarkdown {{
+            font-family: 'Inter', sans-serif;
             color: var(--text-main);
-        }}
-        
-        /* Bengali Text Class */
-        .bangla-text {{
-            font-family: 'Noto Serif Bengali', serif;
         }}
 
         /* App Background */
         .stApp {{
-            background-color: var(--bg);
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
         }}
 
         /* Main Container */
         .block-container {{
-            max-width: 1200px !important;
+            max-width: 1400px !important;
             margin: 2rem auto !important;
             background: var(--surface);
-            border: 2px solid var(--border);
+            border: 2px solid var(--primary);
             box-shadow: var(--shadow);
-            padding: 3rem !important;
-            border-radius: 0px; /* Sharp corners for Neo-SaaS look */
+            padding: 2.5rem !important;
+            border-radius: 16px;
         }}
 
         /* Headings */
         h1, h2, h3, h4, h5, h6 {{
-            font-family: 'Playfair Display', serif;
+            font-family: 'Inter', sans-serif;
             color: var(--text-main) !important;
             font-weight: 700;
+        }}
+        h1 {{
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }}
 
         /* Buttons */
         .stButton > button {{
-            background-color: var(--primary) !important;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
             color: white !important;
-            border: 2px solid black !important;
-            border-radius: 0px !important;
-            box-shadow: 4px 4px 0px 0px black !important;
-            font-family: 'Playfair Display', serif !important;
-            font-weight: 700 !important;
-            transition: all 0.2s ease-in-out !important;
+            border: none !important;
+            border-radius: 12px !important;
+            box-shadow: 0 4px 16px rgba(255, 90, 54, 0.4) !important;
+            font-family: 'Inter', sans-serif !important;
+            font-weight: 600 !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
+            padding: 0.75rem 1.5rem !important;
         }}
         .stButton > button:hover {{
-            transform: translate(2px, 2px) !important;
-            box-shadow: 2px 2px 0px 0px black !important;
-            background-color: var(--primary-dark) !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 8px 24px rgba(255, 90, 54, 0.6) !important;
         }}
         .stButton > button:active {{
-            transform: translate(4px, 4px) !important;
-            box-shadow: 0px 0px 0px 0px black !important;
+            transform: translateY(0px) !important;
+        }}
+
+        /* Download Buttons */
+        .stDownloadButton > button {{
+            background: var(--surface) !important;
+            color: var(--primary) !important;
+            border: 2px solid var(--primary) !important;
+            border-radius: 12px !important;
+            font-weight: 600 !important;
+            transition: all 0.3s ease !important;
+        }}
+        .stDownloadButton > button:hover {{
+            background: var(--primary) !important;
+            color: white !important;
+            transform: translateY(-2px) !important;
         }}
 
         /* Inputs */
         .stTextInput > div > div > input, 
         .stTextArea > div > div > textarea, 
-        .stSelectbox > div > div > div {{
-            background-color: white !important;
-            border: 2px solid black !important;
-            border-radius: 0px !important;
-            color: black !important;
-            font-family: 'Playfair Display', serif !important;
-            box-shadow: 4px 4px 0px 0px rgba(0,0,0,0.1) !important;
+        .stSelectbox > div > div > div, 
+        .stNumberInput > div > div > input {{
+            background-color: var(--surface) !important;
+            border: 2px solid rgba(255, 90, 54, 0.3) !important;
+            border-radius: 12px !important;
+            color: var(--text-main) !important;
+            font-family: 'Inter', sans-serif !important;
+            transition: all 0.3s ease !important;
         }}
         .stTextInput > div > div > input:focus, 
         .stTextArea > div > div > textarea:focus {{
-            box-shadow: 4px 4px 0px 0px var(--primary) !important;
+            box-shadow: 0 0 0 2px var(--primary) !important;
             border-color: var(--primary) !important;
         }}
 
         /* Tabs */
         .stTabs [data-baseweb="tab-list"] {{
-            gap: 10px;
+            gap: 8px;
             background-color: transparent;
+            border-bottom: 2px solid rgba(255, 90, 54, 0.2);
         }}
         .stTabs [data-baseweb="tab"] {{
-            background-color: white;
-            border: 2px solid black;
-            border-radius: 0px;
-            padding: 10px 20px;
-            font-family: 'Playfair Display', serif;
-            font-weight: 700;
-            box-shadow: 4px 4px 0px 0px black;
+            background: transparent;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            padding: 12px 24px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
         }}
         .stTabs [data-baseweb="tab"]:hover {{
+            background: rgba(255, 90, 54, 0.1);
             color: var(--primary);
-            transform: translate(-2px, -2px);
-            box-shadow: 6px 6px 0px 0px black;
         }}
         .stTabs [aria-selected="true"] {{
-            background-color: var(--primary) !important;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
             color: white !important;
+            box-shadow: 0 -4px 12px rgba(255, 90, 54, 0.3);
         }}
+
+        /* Sliders */
+        .stSlider > div > div > div > div {{
+            background: var(--primary) !important;
+        }}
+
+        /* Success/Info/Warning/Error boxes */
+        .stAlert {{
+            background-color: var(--surface);
+            border-left: 4px solid var(--primary);
             border-radius: 8px;
-            padding: 0.5rem 1rem;
+            color: var(--text-main);
         }}
-        .stDownloadButton > button:hover {{
-            background: var(--primary-dark);
+
+        /* Code blocks */
+        .stCodeBlock {{
+            background-color: var(--surface) !important;
+            border: 1px solid rgba(255, 90, 54, 0.2) !important;
+            border-radius: 8px !important;
         }}
-    
-    /* More targeted text color fixes */
-    p {{
-        color: {THEME['text_main']} !important;
-    }}
-    
-    label {{
-        color: {THEME['text_main']} !important;
-    }}
-    
-    .bangla-text {{
-        font-family: 'Tiro Bangla', serif !important;
-        color: {THEME['text_main']} !important;
-    }}
-    
-    /* Force white background on ALL inputs */
-    input, textarea, select {{
-        background-color: {THEME['surface']} !important;
-        color: {THEME['text_main']} !important;
-    }}
 
-    /* Fix all text inputs and text areas */
-    .stTextInput > div > div > input {{
-        background-color: {THEME['surface']} !important;
-        color: {THEME['text_main']} !important;
-        border: 2px solid {THEME['border']} !important;
-    }}
-    
-    .stTextArea > div > div > textarea {{
-        background-color: {THEME['surface']} !important;
-        color: {THEME['text_main']} !important;
-        border: 2px solid {THEME['border']} !important;
-    }}
-    
-    /* Fix selectbox - COMPREHENSIVE */
-    .stSelectbox > div > div {{
-        background-color: {THEME['surface']} !important;
-        color: {THEME['text_main']} !important;
-    }}
-    
-    /* Fix dropdown menu items */
-    [data-baseweb="select"] {{
-        background-color: {THEME['surface']} !important;
-    }}
-    
-    [data-baseweb="select"] > div {{
-        background-color: {THEME['surface']} !important;
-        color: {THEME['text_main']} !important;
-    }}
-    
-    /* Fix dropdown options */
-    [role="option"] {{
-        background-color: {THEME['surface']} !important;
-        color: {THEME['text_main']} !important;
-    }}
-    
-    [role="option"]:hover {{
-        background-color: {THEME['bg']} !important;
-        color: {THEME['text_main']} !important;
-    }}
-    
-    /* Fix listbox */
-    [role="listbox"] {{
-        background-color: {THEME['surface']} !important;
-    }}
-    
-    [role="listbox"] li {{
-        background-color: {THEME['surface']} !important;
-        color: {THEME['text_main']} !important;
-    }}
-    
-    [role="listbox"] li:hover {{
-        background-color: {THEME['bg']} !important;
-    }}
-    
-    /* Fix all dropdown text */
-    [data-baseweb="select"] span {{
-        color: {THEME['text_main']} !important;
-    }}
-    
-    [data-baseweb="select"] div {{
-        color: {THEME['text_main']} !important;
-        background-color: {THEME['surface']} !important;
-    }}
-    
-    /* Fix menu container */
-    [data-baseweb="menu"] {{
-        background-color: {THEME['surface']} !important;
-    }}
-    
-    [data-baseweb="menu"] li {{
-        background-color: {THEME['surface']} !important;
-        color: {THEME['text_main']} !important;
-    }}
-    
-    /* Fix select slider */
-    .stSelectSlider {{
-        background-color: {THEME['surface']} !important;
-    }}
-    
-    .stSelectSlider > div {{
-        background-color: {THEME['surface']} !important;
-        color: {THEME['text_main']} !important;
-    }}
-    
-    /* Fix slider labels and values */
-    .stSlider > div > div > div {{
-        color: {THEME['text_main']} !important;
-    }}
-    
-    /* Fix checkbox and radio labels */
-    .stCheckbox label, .stRadio label {{
-        color: {THEME['text_main']} !important;
-    }}
-    
-    /* Fix markdown text */
-    .stMarkdown {{
-        color: {THEME['text_main']} !important;
-    }}
-    
-    /* Fix code blocks */
-    code {{
-        background-color: #F5F5F5 !important;
-        color: {THEME['text_main']} !important;
-        padding: 2px 6px;
-        border-radius: 4px;
-    }}
-    
-    pre {{
-        background-color: #F5F5F5 !important;
-        color: {THEME['text_main']} !important;
-    }}
-    
-    /* Fix info/warning/error boxes */
-    .stAlert {{
-        color: {THEME['text_main']} !important;
-    }}
-    
-    /* Fix expander text */
-    .streamlit-expanderHeader {{
-        color: {THEME['text_main']} !important;
-    }}
-    
-    /* Fix captions */
-    .caption {{
-        color: {THEME['text_secondary']} !important;
-    }}
-    
-    small {{
-        color: {THEME['text_secondary']} !important;
-    }}
+        /* Separator */
+        hr {{
+            border-color: rgba(255, 90, 54, 0.3) !important;
+        }}
 
-    /* The old .stTabs [data-baseweb="tab-list"] and .stTabs [data-baseweb="tab"] and .stTabs [aria-selected="true"] rules are replaced by the new pill-style navigation */
-
-    /* The old div.stButton > button[kind="primary"] and div.stButton > button rules are replaced by the new consistent button style */
-    
-    div.stButton > button:hover {{
-        opacity: 0.9;
-    }}
-    
-    .success-box {{
-        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
-        border-left: 4px solid {THEME['success']};
-        padding: 1rem;
-        border-radius: 8px;
-        margin: 1rem 0;
-        color: {THEME['text_main']} !important;
-    }}
-    
-    /* Fix download buttons - COMPREHENSIVE */
-    /* The old .stDownloadButton > button rules are replaced by the new consistent download button style */
-    
-    .stDownloadButton > button > div {{
-        color: white !important;
-    }}
-    
-    .stDownloadButton > button span {{
-        color: white !important;
-    }}
-    
-    /* Ensure download button text is always white */
-    button[kind="secondary"] {{
-        background-color: {THEME['text_main']} !important;
-        color: white !important;
-    }}
-    
-    button[kind="secondary"] * {{
-        color: white !important;
-    }}
-    
-    /* Ensure all widget labels are visible */
-    label {{
-        color: {THEME['text_main']} !important;
-        font-weight: 500 !important;
-    }}
-    
-    /* Fix number input */
-    .stNumberInput input {{
-        background-color: {THEME['surface']} !important;
-        color: {THEME['text_main']} !important;
-    }}
-    
-    /* Fix multiselect */
-    .stMultiSelect {{
-        color: {THEME['text_main']} !important;
-    }}
-    
-    .stMultiSelect > div {{
-        background-color: {THEME['surface']} !important;
-    }}
-    
-    /* Fix sidebar text */
-    .css-1d391kg, [data-testid="stSidebar"] {{
-        background-color: {THEME['surface']} !important;
-    }}
-    
-    [data-testid="stSidebar"] * {{
-        color: {THEME['text_main']} !important;
-    }}
-    
-    /* Fix metric values */
-    [data-testid="stMetricValue"] {{
-        color: {THEME['text_main']} !important;
-    }}
-    
-    /* Fix all container text */
-    [data-testid="stVerticalBlock"] {{
-        color: {THEME['text_main']} !important;
-    }}
-    
-    /* Override Streamlit defaults */
-    .stApp * {{
-        color: inherit;
-    }}
-    
-    /* Ensure form labels are visible */
-    .stForm label {{
-        color: {THEME['text_main']} !important;
-    }}
-    
-    /* ULTRA-SPECIFIC FIXES for dropdowns and popovers */
-    [data-baseweb="popover"] {{
-        background-color: {THEME['surface']} !important;
-    }}
-    
-    [data-baseweb="popover"] * {{
-        background-color: {THEME['surface']} !important;
-        color: {THEME['text_main']} !important;
-    }}
-    
-    /* Fix any remaining black on black */
-    div[class*="Select"] {{
-        background-color: {THEME['surface']} !important;
-        color: {THEME['text_main']} !important;
-    }}
-    
-    div[class*="select"] {{
-        background-color: {THEME['surface']} !important;
-        color: {THEME['text_main']} !important;
-    }}
-    
-    /* Ensure all text in widgets is black */
-    .stWidget {{
-        color: {THEME['text_main']} !important;
-    }}
-    
-    .stWidget * {{
-        color: {THEME['text_main']} !important;
-    }}
-    
-    /* Fix dropdown value display */
-    [data-baseweb="select"] [data-testid] {{
-        background-color: {THEME['surface']} !important;
-        color: {THEME['text_main']} !important;
-    }}
-    
-    /* Force all baseui components to have white bg */
-    [class*="baseui"] {{
-        background-color: {THEME['surface']} !important;
-        color: {THEME['text_main']} !important;
-    }}
-    
-    /* Fix input value text */
-    [data-baseweb="input"] input {{
-        background-color: {THEME['surface']} !important;
-        color: {THEME['text_main']} !important;
-    }}
+        /* Expander */
+        .streamlit-expanderHeader {{
+            background: var(--surface) !important;
+            border: 2px solid rgba(255, 90, 54, 0.2) !important;
+            border-radius: 12px !important;
+            color: var(--text-main) !important;
+        }}
+        .streamlit-expanderHeader:hover {{
+            border-color: var(--primary) !important;
+        }}
     </style>
-""", unsafe_allow_html=True)
+    """,
+    unsafe_allow_html=True,
+)
 
-# --- SIDEBAR ---
-with st.sidebar:
-    st.markdown("### ⚙️ Settings")
-    
-    # User Preferences
-    with st.expander("🎨 Preferences"):
-        font_size = st.select_slider("Font Size", ["Small", "Medium", "Large"], value="Medium")
-        show_advanced = st.checkbox("Show Advanced Options", value=False)
-        st.session_state.user_prefs['show_advanced'] = show_advanced
-    
-    # History
-    with st.expander("📜 Recent History"):
-        if st.session_state.history:
-            for feature, items in st.session_state.history.items():
-                if items:
-                    st.markdown(f"**{feature}**")
-                    for idx, item in enumerate(items[:3]):
-                        st.caption(f"• {item['title']} - {item['timestamp']}")
-        else:
-            st.info("No history yet")
-    
-    # Favorites
-    with st.expander("⭐ Favorites"):
-        if st.session_state.favorites:
-            for idx, fav in enumerate(st.session_state.favorites[-5:]):
-                st.caption(f"• {fav['title']} ({fav['feature']})")
-        else:
-            st.info("No favorites yet")
-    
-    st.markdown("---")
-    if st.button("🗑️ Clear All Data"):
-        st.session_state.history = {}
-        st.session_state.favorites = []
-        st.success("Data cleared!")
+# Header with logo
+col_logo, col_title = st.columns([1, 6])
+with col_logo:
+    st.image("https://www.metamorphosis.com.bd/web/image/website/1/logo/Metamorphosis?unique=1d24751", width=100)
+with col_title:
+    st.title("Metamorphosis Studio")
+    st.caption("🚀 Advanced AI-Powered Documentation & Development Suite")
 
-# --- HEADER ---
-st.markdown(f"""
-    <div style="text-align: center; padding: 2rem; background: linear-gradient(135deg, {THEME['primary']}, {THEME['accent']}); border-radius: 20px; margin-bottom: 2rem;">
-        <div style="font-size: 3.5rem; animation: float 3s ease-in-out infinite;">🦋</div>
-        <h1 style="color: white; margin: 0;">Metamorphosis Studio Pro</h1>
-        <p style="color: rgba(255,255,255,0.9);">Ultimate AI Workspace with Advanced Features</p>
-        <p class="bangla-text" style="color: rgba(255,255,255,0.85);">সম্পূর্ণ AI কর্মক্ষেত্র - উন্নত ফিচার সহ</p>
-    </div>
-""", unsafe_allow_html=True)
-
-# --- TABS ---
-tabs = st.tabs([
-    "🔑 API",
-    "✨ Prompt Refiner",
-    "📊 Diagram Generator",
-    "📝 Document Generator",
-    "💻 Code Generator",
-    "📚 Summarizer",
-    "🌐 Translator",
-    "✉️ Email Writer",
-    "🔍 Analyzer",
-    "📝 Quiz Generator"
-])
-
-# === TAB 1: API KEY ===
-with tabs[0]:
-    st.markdown("### 🔑 API Key Management")
-    
-    api_input = st.text_input("Gemini API Key", type="password")
-    if st.button("💾 Save & Verify", type="primary"):
-        if api_input:
-            try:
-                genai.configure(api_key=api_input)
-                model = genai.GenerativeModel("gemini-2.5-flash")
-                model.generate_content("Test")
-                st.session_state.api_key = api_input
-                st.markdown('<div class="success-box">✅ Verified!</div>', unsafe_allow_html=True)
-            except Exception as e:
-                st.error(f"❌ {e}")
-    
-    if "api_key" in st.session_state:
-        st.success(f"Active: {st.session_state.api_key[:8]}...")
-
-# === TAB 2: PROMPT REFINER ===
-with tabs[1]:
-    st.markdown("### ✨ Advanced Prompt Refiner")
-    
-    col1, col2 = st.columns([1, 1])
-    
-    with col1:
-        # Template Selection
-        template = st.selectbox("📚 Template", ["None"] + list(PROMPT_TEMPLATES.keys()))
-        if template != "None":
-            st.info(f"Template: {PROMPT_TEMPLATES[template][:100]}...")
-        
-        # Controls
-        context = st.selectbox("Context", ["General", "Software Engineering", "Data Science", "Legal", "Medical", "Business", "Creative"])
-        tone = st.select_slider("Tone", ["Casual", "Neutral", "Professional", "Academic"])
-        complexity = st.slider("Complexity", 1, 10, 7)
-        
-        if show_advanced:
-            length = st.select_slider("Output Length", ["Brief", "Standard", "Detailed"])
-            format_type = st.selectbox("Format", ["Paragraph", "Bullet Points", "Numbered List"])
-        
-        # Input
-        base_text = PROMPT_TEMPLATES.get(template, "") if template != "None" else ""
-        prompt_input = st.text_area("Draft Prompt", value=base_text, height=200)
-        char_count = len(prompt_input)
-        st.caption(f"📊 {char_count} characters | {len(prompt_input.split())} words")
-        
-        col_btn1, col_btn2 = st.columns(2)
-        with col_btn1:
-            if st.button("🚀 Refine", type="primary", use_container_width=True):
-                if "api_key" in st.session_state and prompt_input:
-                    try:
-                        genai.configure(api_key=st.session_state.api_key)
-                        model = genai.GenerativeModel("gemini-2.5-flash")
-                        sys_prompt = f"Refine prompt. Context: {context}. Tone: {tone}. Complexity: {complexity}/10. No **bold**."
-                        res = model.generate_content(f"{sys_prompt}\n{prompt_input}")
-                        st.session_state.refined_prompt = res.text.replace("**", "")
-                        add_to_history("Prompts", st.session_state.refined_prompt, f"{context} prompt")
-                    except Exception as e:
-                        st.error(f"❌ {e}")
-        
-        with col_btn2:
-            if 'refined_prompt' in st.session_state:
-                if st.button("⭐ Save Favorite", use_container_width=True):
-                    save_to_favorites(st.session_state.refined_prompt, "Prompts", f"{context} prompt")
-                    st.success("Saved!")
-    
-    with col2:
-        st.markdown("#### 📋 Refined Output")
-        if "refined_prompt" in st.session_state:
-            st.text_area("Result", st.session_state.refined_prompt, height=450)
-            st.download_button("📥 Download", st.session_state.refined_prompt, "prompt.txt")
-        else:
-            st.info("Output will appear here")
-
-# === TAB 3: DIAGRAMS ===
-with tabs[2]:
-    st.markdown("### 📊 Diagram Generator")
-    
-    col1, col2 = st.columns([1, 2])
-    
-    with col1:
-        # Template & Theme
-        diagram_template = st.selectbox("📐 Template", ["None"] + list(DIAGRAM_TEMPLATES.keys()))
-        diagram_theme = st.selectbox("🎨 Theme", ["default", "dark", "forest", "neutral"])
-        diagram_type = st.selectbox("Type", ["Flowchart", "Sequence", "ER Diagram", "Gantt", "Mindmap"])
-        
-        # Requirements
-        base_code = DIAGRAM_TEMPLATES.get(diagram_template, "") if diagram_template != "None" else ""
-        reqs = st.text_area("Requirements", value=base_code if not base_code.startswith("```") else "", height=200)
-        
-        if show_advanced:
-            export_size = st.selectbox("Export Size", ["Standard", "Large (2x)", "Extra Large (4x)"])
-            include_legend = st.checkbox("Include Legend")
-        
-        if st.button("🎨 Generate", type="primary"):
-            if "api_key" in st.session_state:
-                try:
-                    genai.configure(api_key=st.session_state.api_key)
-                    model = genai.GenerativeModel("gemini-2.5-flash")
-                    
-                    # Comprehensive Mermaid syntax prompt
-                    sys_prompt = f"""You are a Mermaid diagram expert. Generate SYNTACTICALLY PERFECT Mermaid code for {diagram_type}.
-
-CRITICAL RULES:
-1. Declaration: Start with correct diagram type (flowchart TD, sequenceDiagram, classDiagram, etc.)
-2. Node IDs: Use alphanumeric only, no special chars, DON'T start with 'o' or 'x'
-3. Labels: ALWAYS quote labels with spaces or special chars: id["Label Text"]
-4. Arrows: Use correct syntax for diagram type (-->, ->, -.>, etc.)
-5. Never use lowercase "end" as node label - use "End" or "END"
-6. Escape special chars: & → &amp;, < → &lt;
-7. Close all blocks: subgraph, loop, alt must end with 'end'
-8. A4-Compatible: Keep diagram hierarchical and not too wide (max 5-6 nodes horizontally)
-
-DIAGRAM-SPECIFIC RULES:
-- Flowchart: Use flowchart TD/LR, shapes A[Box], B(Rounded), C{{Diamond}}, D[(Database)]
-- Sequence: Define participants first, use A->>B: message, activate/deactivate
-- Class: Use classDiagram, define classes with attributes/methods, relationships <|--
-- ER: Use erDiagram, ENTITY ||--o{{ RELATION syntax
-- Gantt: dateFormat YYYY-MM-DD, section headers, task :id, start, duration
-- State: Use stateDiagram-v2, [*] for start/end
-- Pie: pie title "Title", "Label" : value
-
-OUTPUT: Only valid Mermaid code wrapped in ```mermaid``` block. No explanations."""
-
-                    res = model.generate_content(f"{sys_prompt}\n\nREQUIREMENTS:\n{reqs}")
-                    st.session_state.mermaid_code = sanitize_mermaid_code(res.text)
-                    add_to_history("Diagrams", st.session_state.mermaid_code, diagram_type)
-                    st.success("✅ Diagram generated with syntax validation!")
-                except Exception as e:
-                    st.error(f"❌ {e}")
-    
-    with col2:
-        if "mermaid_code" in st.session_state:
-            st.markdown("#### 👁️ Preview")
-            st.components.v1.html(
-                f"""
-                <style>
-                    .mermaid-container {{
-                        width: 100%;
-                        max-width: 794px; /* A4 width in pixels at 96 DPI */
-                        margin: 0 auto;
-                        padding: 20px;
-                        background: white;
-                        border-radius: 12px;
-                        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-                    }}
-                    .mermaid {{
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        min-height: 300px;
-                    }}
-                </style>
-                <script type="module">
-                    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-                    mermaid.initialize({{ 
-                        startOnLoad: true, 
-                        theme: '{diagram_theme}',
-                        flowchart: {{ 
-                            useMaxWidth: true,
-                            htmlLabels: true,
-                            curve: 'basis'
-                        }},
-                        sequence: {{
-                            useMaxWidth: true
-                        }},
-                        gantt: {{
-                            useMaxWidth: true
-                        }}
-                    }});
-                </script>
-                <div class="mermaid-container">
-                    <div class="mermaid">{st.session_state.mermaid_code}</div>
-                </div>
-                """,
-                height=600,
-                scrolling=True
-            )
-            
-            # Downloads
-            st.markdown("#### 💾 Downloads")
-            dc1, dc2, dc3, dc4 = st.columns(4)
-            
-            png_bytes = get_mermaid_img(st.session_state.mermaid_code, "png")
-            svg_bytes = get_mermaid_img(st.session_state.mermaid_code, "svg")
-            
-            with dc1:
-                if png_bytes: st.download_button("PNG", png_bytes, "diagram.png", use_container_width=True)
-            with dc2:
-                if png_bytes:
-                    jpg_bytes = convert_to_jpg(png_bytes)
-                    if jpg_bytes: st.download_button("JPG", jpg_bytes, "diagram.jpg", use_container_width=True)
-            with dc3:
-                if svg_bytes: st.download_button("SVG", svg_bytes, "diagram.svg", use_container_width=True)
-            with dc4:
-                if png_bytes: st.download_button("PDF", create_pdf("Diagram", png_bytes), "diagram.pdf", use_container_width=True)
-            
-            # Edit Mode
-            with st.expander("✏️ Edit Code"):
-                edited_code = st.text_area("Mermaid Code", st.session_state.mermaid_code, height=200)
-                if st.button("🔄 Update Preview"):
-                    st.session_state.mermaid_code = edited_code
-                    st.rerun()
-
-# === TAB 4: DOCUMENTS ===
-with tabs[3]:
-    st.markdown("### 📝 Document Generator")
-    
-    col1, col2 = st.columns([1, 2])
-    
-    with col1:
-        doc_type = st.selectbox("Type", ["BRD", "TDD", "API Spec", "User Manual", "SOP", "Report", "Other"])
-        doc_style = st.selectbox("Style", ["Professional", "Academic", "Technical", "Simple"])
-        
-        if show_advanced:
-            include_toc = st.checkbox("Include Table of Contents", value=True)
-            include_meta = st.checkbox("Include Metadata")
-            if include_meta:
-                author = st.text_input("Author")
-                version = st.text_input("Version", "1.0")
-        
-        # File Upload for Context
-        st.markdown("#### 📤 Upload Context File (Optional)")
-        uploaded_file = st.file_uploader(
-            "Upload company profile, reference docs, etc.", 
-            type=["txt", "md", "pdf", "docx"],
-            help="Upload a file to provide context for document generation",
-            key="doc_context_upload"
-        )
-        
-        context_text = ""
-        if uploaded_file is not None:
-            try:
-                if uploaded_file.type == "text/plain" or uploaded_file.name.endswith(".txt"):
-                    context_text = uploaded_file.read().decode("utf-8")
-                elif uploaded_file.name.endswith(".md"):
-                    context_text = uploaded_file.read().decode("utf-8")
-                elif uploaded_file.name.endswith(".docx"):
-                    doc = Document(io.BytesIO(uploaded_file.read()))
-                    context_text = "\n".join([para.text for para in doc.paragraphs])
-                elif uploaded_file.name.endswith(".pdf"):
-                    # Basic PDF text extraction (requires pypdf)
-                    try:
-                        import PyPDF2
-                        pdf_reader = PyPDF2.PdfReader(io.BytesIO(uploaded_file.read()))
-                        context_text = "\n".join([page.extract_text() for page in pdf_reader.pages])
-                    except ImportError:
-                        st.warning("⚠️ PDF support requires pypdf. Using filename only.")
-                        context_text = f"[PDF file: {uploaded_file.name}]"
-                
-                if context_text:
-                    st.success(f"✅ Loaded {len(context_text)} characters from {uploaded_file.name}")
-            except Exception as e:
-                st.error(f"❌ Error reading file: {e}")
-        
-        doc_details = st.text_area("Content Details", height=250, key="doc_details_input")
-        
-        if st.button("📄 Generate", type="primary"):
-            if "api_key" in st.session_state:
-                try:
-                    genai.configure(api_key=st.session_state.api_key)
-                    model = genai.GenerativeModel("gemini-2.5-flash")
-                    sys_prompt = f"Write {doc_type}. Style: {doc_style}. Markdown format."
-                    if show_advanced and include_toc:
-                        sys_prompt += " Include TOC."
-                    
-                    # Add context if file uploaded
-                    full_prompt = f"{sys_prompt}\n\nCONTENT REQUIREMENTS:\n{doc_details}"
-                    if context_text:
-                        full_prompt += f"\n\nCONTEXT FROM UPLOADED FILE:\n{context_text[:5000]}"  # Limit to 5000 chars
-                    
-                    res = model.generate_content(full_prompt)
-                    st.session_state.doc_content = res.text
-                    add_to_history("Documents", st.session_state.doc_content, doc_type)
-                    st.success("✅ Document generated with uploaded context!")
-                except Exception as e:
-                    st.error(f"❌ {e}")
-    
-    with col2:
-        if "doc_content" in st.session_state:
-            st.markdown("#### 👁️ Preview")
-            st.markdown(st.session_state.doc_content)
-            st.markdown("---")
-            
-            st.markdown("#### 💾 Downloads & Export")
-            dl1, dl2, dl3 = st.columns(3)
-            with dl1:
-                st.download_button("📥 MD", st.session_state.doc_content, "document.md", use_container_width=True)
-            with dl2:
-                st.download_button("📥 DOCX", create_docx(st.session_state.doc_content), "document.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", use_container_width=True)
-            with dl3:
-                st.download_button("📥 PDF", create_pdf(st.session_state.doc_content), "document.pdf", "application/pdf", use_container_width=True)
-            
-            # Google Docs Export - Simplified
-            st.markdown("#### 📄 Export to Google Docs")
-            
-            col1, col2 = st.columns([2, 1])
-            
-            with col1:
-                # Show content in copyable text area
-                st.text_area(
-                    "Step 1: Select All (Ctrl+A) and Copy (Ctrl+C):", 
-                    st.session_state.doc_content, 
-                    height=120,
-                    key="gdocs_export_area",
-                    help="Select all text in this box and copy it"
-                )
-            
-            with col2:
-                st.markdown("<br>", unsafe_allow_html=True)
-                # Button to open Google Docs
-                st.markdown("""
-                <a href="https://docs.google.com/document/create" target="_blank">
-                    <button style="
-                        width: 100%;
-                        padding: 1.25rem;
-                        background: linear-gradient(135deg, #4285F4 0%, #34A853 100%);
-                        color: white;
-                        border: none;
-                        border-radius: 12px;
-                        font-weight: 600;
-                        font-size: 1.1rem;
-                        cursor: pointer;
-                        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-                        transition: all 0.3s ease;
-                    " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(0,0,0,0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.2)';">
-                        📄 Step 2: Open Google Docs
-                    </button>
-                </a>
-                <p style="font-size: 0.85rem; color: #666; margin-top: 0.75rem; text-align: center;">
-                    Then paste (Ctrl+V or Cmd+V)
-                </p>
-                """, unsafe_allow_html=True)
-            
-            st.info("💡 **Quick tip**: After copying, the Google Docs button opens a new document where you can paste immediately!")
-            
-            # Alternative: Download as TXT for easy import
-            st.markdown("#### 📥 Alternative: Download as Text")
-            st.download_button(
-                "📄 Download as TXT (for Google Docs import)",
-                st.session_state.doc_content,
-                "document.txt",
-                "text/plain",
-                help="Download and then use File > Open in Google Docs",
-                use_container_width=True
-            )
-
-# === TAB 5: CODE GENERATOR ===
-with tabs[4]:
-    st.markdown("### 💻 Code Generator")
-    
-    col1, col2 = st.columns([1, 2])
-    
-    with col1:
-        language = st.selectbox("Language", ["Python", "JavaScript", "TypeScript", "Java", "C++", "Go"])
-        framework = st.selectbox("Framework", CODE_FRAMEWORKS.get(language, ["None"]))
-        style = st.selectbox("Style", ["OOP", "Functional", "Procedural"])
-        
-        if show_advanced:
-            include_docs = st.checkbox("Include Documentation", value=True)
-            include_types = st.checkbox("Include Type Hints", value=True)
-            include_tests = st.checkbox("Generate Unit Tests")
-            include_deps = st.checkbox("Generate Dependencies")
-        
-        code_req = st.text_area("Requirements", height=250)
-        
-        if st.button("⚡ Generate", type="primary"):
-            if "api_key" in st.session_state:
-                try:
-                    genai.configure(api_key=st.session_state.api_key)
-                    model = genai.GenerativeModel("gemini-2.5-flash")
-                    sys_prompt = f"Generate {language} code. Framework: {framework}. Style: {style}."
-                    if show_advanced:
-                        if include_docs: sys_prompt += " Include docs."
-                        if include_types: sys_prompt += " Include types."
-                    res = model.generate_content(f"{sys_prompt}\n{code_req}")
-                    st.session_state.generated_code = res.text
-                    add_to_history("Code", st.session_state.generated_code, f"{language} code")
-                    
-                    # Generate tests if requested
-                    if show_advanced and include_tests:
-                        test_res = model.generate_content(f"Generate unit tests for:\n{res.text}")
-                        st.session_state.generated_tests = test_res.text
-                except Exception as e:
-                    st.error(f"❌ {e}")
-    
-    with col2:
-        if "generated_code" in st.session_state:
-            st.markdown("#### 💻 Generated Code")
-            st.code(st.session_state.generated_code, language=language.lower())
-            st.download_button("📥 Download", st.session_state.generated_code, f"code.{language[:2].lower()}")
-            
-            if show_advanced and 'generated_tests' in st.session_state:
-                with st.expander("🧪 Unit Tests"):
-                    st.code(st.session_state.generated_tests, language=language.lower())
-
-# === TAB 6: SUMMARIZER ===
-with tabs[5]:
-    st.markdown("### 📚 Text Summarizer")
-    
-    col1, col2 = st.columns([1, 1])
-    
-    with col1:
-        compression = st.slider("Compression Ratio", 10, 90, 50, help="% of original length")
-        format_type = st.selectbox("Format", ["Paragraph", "Bullet Points", "Key Points"])
-        
-        if show_advanced:
-            extract_info = st.multiselect("Extract", ["Names", "Dates", "Numbers", "Locations"])
-            multilingual = st.checkbox("Multi-language Support")
-        
-        text_to_summarize = st.text_area("Text to Summarize", height=350, key="summarize_input")
-        word_count = len(text_to_summarize.split())
-        st.caption(f"📊 {word_count} words → ~{int(word_count * compression / 100)} words")
-        
-        if st.button("📊 Summarize", type="primary"):
-            if "api_key" in st.session_state:
-                try:
-                    genai.configure(api_key=st.session_state.api_key)
-                    model = genai.GenerativeModel("gemini-2.5-flash")
-                    sys_prompt = f"Summarize to {compression}% length. Format: {format_type}."
-                    res = model.generate_content(f"{sys_prompt}\n{text_to_summarize}")
-                    st.session_state.summary = res.text
-                    add_to_history("Summaries", st.session_state.summary, f"{compression}% summary")
-                except Exception as e:
-                    st.error(f"❌ {e}")
-    
-    with col2:
-        if "summary" in st.session_state:
-            st.markdown("#### 📄 Summary")
-            st.markdown(st.session_state.summary)
-            st.download_button("📥 Download", st.session_state.summary, "summary.txt")
-
-# === TAB 7: TRANSLATOR ===
-with tabs[6]:
-    st.markdown("### 🌐 Translation Tool")
-    
-    col1, col2 = st.columns([1, 1])
-    
-    with col1:
-        target_lang = st.selectbox("Target Language", [
-            "Spanish", "French", "German", "Chinese", "Japanese", "Korean",
-            "Arabic", "Hindi", "Bengali", "Portuguese", "Russian", "Italian"
-        ])
-        
-        if show_advanced:
-            formality = st.select_slider("Formality", ["Casual", "Neutral", "Formal"])
-            preserve_format = st.checkbox("Preserve Formatting", value=True)
-        
-        text_to_translate = st.text_area("Text to Translate", height=350, key="translate_input")
-        
-        if st.button("🌐 Translate", type="primary"):
-            if "api_key" in st.session_state:
-                try:
-                    genai.configure(api_key=st.session_state.api_key)
-                    model = genai.GenerativeModel("gemini-2.5-flash")
-                    sys_prompt = f"Translate to {target_lang}."
-                    if show_advanced:
-                        sys_prompt += f" Formality: {formality}."
-                    res = model.generate_content(f"{sys_prompt}\n{text_to_translate}")
-                    st.session_state.translation = res.text
-                    add_to_history("Translations", st.session_state.translation, f"To {target_lang}")
-                except Exception as e:
-                    st.error(f"❌ {e}")
-    
-    with col2:
-        if "translation" in st.session_state:
-            st.markdown(f"#### 🎯 {target_lang}")
-            st.text_area("Result", st.session_state.translation, height=400, key="translate_output")
-            st.download_button("📥 Download", st.session_state.translation, f"translation_{target_lang.lower()}.txt")
-
-# === TAB 8: EMAIL WRITER ===
-with tabs[7]:
-    st.markdown("### ✉️ Email Draft Generator")
-    
-    col1, col2 = st.columns([1, 1])
-    
-    with col1:
-        email_template = st.selectbox("Template", ["None"] + list(EMAIL_TEMPLATES.keys()))
-        email_type = st.selectbox("Type", ["Formal Business", "Casual", "Marketing", "Follow-up", "Thank You"])
-        email_tone = st.select_slider("Tone", ["Very Formal", "Formal", "Neutral", "Friendly"])
-        
-        if show_advanced:
-            include_subject = st.checkbox("Auto-generate Subject", value=True)
-            signature = st.text_area("Signature", "Best regards,\n[Your Name]")
-        
-        base_email = EMAIL_TEMPLATES.get(email_template, "") if email_template != "None" else ""
-        email_context = st.text_area("Key Points", value=base_email, height=200)
-        
-        if st.button("✉️ Generate", type="primary"):
-            if "api_key" in st.session_state:
-                try:
-                    genai.configure(api_key=st.session_state.api_key)
-                    model = genai.GenerativeModel("gemini-2.5-flash")
-                    sys_prompt = f"Write {email_type} email. Tone: {email_tone}."
-                    if show_advanced and include_subject:
-                        sys_prompt += " Include subject line."
-                    res = model.generate_content(f"{sys_prompt}\n{email_context}")
-                    st.session_state.email_draft = res.text
-                    add_to_history("Emails", st.session_state.email_draft, email_type)
-                except Exception as e:
-                    st.error(f"❌ {e}")
-    
-    with col2:
-        if "email_draft" in st.session_state:
-            st.markdown("#### 📨 Draft")
-            st.text_area("Email", st.session_state.email_draft, height=500, key="email_output")
-            st.download_button("📥 Download", st.session_state.email_draft, "email.txt")
-
-# === TAB 9: CONTENT ANALYZER ===
-with tabs[8]:
-    st.markdown("### 🔍 Content Analyzer")
-    
-    col1, col2 = st.columns([1, 1])
-    
-    with col1:
-        if show_advanced:
-            analysis_depth = st.select_slider("Analysis Depth", ["Quick", "Standard", "Comprehensive"])
-            check_grammar = st.checkbox("Grammar Check")
-            check_seo = st.checkbox("SEO Analysis")
-        
-        text_to_analyze = st.text_area("Content to Analyze", height=400, key="analyze_input")
-        
-        if st.button("🔍 Analyze", type="primary"):
-            if "api_key" in st.session_state:
-                try:
-                    genai.configure(api_key=st.session_state.api_key)
-                    model = genai.GenerativeModel("gemini-2.5-flash")
-                    sys_prompt = """Analyze:
-1. Readability Score (1-10)
-2. Sentiment Analysis
-3. Top 5 Keywords
-4. Word/Sentence Count
-5. Improvement Suggestions"""
-                    if show_advanced:
-                        if check_grammar: sys_prompt += "\n6. Grammar Issues"
-                        if check_seo: sys_prompt += "\n7. SEO Recommendations"
-                    
-                    res = model.generate_content(f"{sys_prompt}\n{text_to_analyze}")
-                    st.session_state.analysis = res.text
-                    add_to_history("Analysis", st.session_state.analysis, "Content analysis")
-                except Exception as e:
-                    st.error(f"❌ {e}")
-    
-    with col2:
-        if "analysis" in st.session_state:
-            st.markdown("#### 📊 Analysis")
-            st.markdown(st.session_state.analysis)
-            st.download_button("📥 Download", st.session_state.analysis, "analysis.txt")
-
-# === TAB 10: QUIZ GENERATOR ===
-with tabs[9]:
-    st.markdown("### 📝 Quiz Generator")
-    
-    col1, col2 = st.columns([1, 2])
-    
-    with col1:
-        question_type = st.selectbox("Type", ["MCQ", "True/False", "Short Answer", "Mixed"])
-        num_questions = st.slider("Questions", 5, 30, 10)
-        difficulty = st.select_slider("Difficulty", ["Easy", "Medium", "Hard"])
-        
-        if show_advanced:
-            include_answers = st.checkbox("Include Answer Key", value=True)
-            randomize = st.checkbox("Randomize Order")
-            point_value = st.number_input("Points per Question", 1, 10, 1)
-        
-        quiz_topic = st.text_area("Topic/Content", height=250)
-        
-        if st.button("🎯 Generate", type="primary"):
-            if "api_key" in st.session_state:
-                try:
-                    genai.configure(api_key=st.session_state.api_key)
-                    model = genai.GenerativeModel("gemini-2.5-flash")
-                    sys_prompt = f"Create {num_questions} {question_type} questions. Difficulty: {difficulty}."
-                    if show_advanced and include_answers:
-                        sys_prompt += " Include answer key."
-                    res = model.generate_content(f"{sys_prompt}\n{quiz_topic}")
-                    st.session_state.quiz = res.text
-                    add_to_history("Quizzes", st.session_state.quiz, f"{num_questions} questions")
-                except Exception as e:
-                    st.error(f"❌ {e}")
-    
-    with col2:
-        if "quiz" in st.session_state:
-            st.markdown("#### 📋 Quiz")
-            st.markdown(st.session_state.quiz)
-            
-            dl1, dl2, dl3 = st.columns(3)
-            with dl1:
-                st.download_button("TXT", st.session_state.quiz, "quiz.txt", use_container_width=True)
-            with dl2:
-                st.download_button("DOCX", create_docx(st.session_state.quiz), "quiz.docx", use_container_width=True)
-            with dl3:
-                st.download_button("PDF", create_pdf(st.session_state.quiz), "quiz.pdf", use_container_width=True)
+st.markdown("---")
 
 # --- FOOTER ---
 st.markdown("---")
