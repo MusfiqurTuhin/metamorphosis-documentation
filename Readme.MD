@@ -13,7 +13,7 @@ Metamorphosis Studio is a Streamlit‑based web application that leverages Googl
 | Feature | Description |
 |---------|-------------|
 | **Prompt Refiner** | Refine prompts with tone, complexity, and context selection. |
-| **Document Generator** | Generate BRD, TDD, API Spec, User Manual, SOP, Report, **Presentation** and more. Includes live preview and download (MD, DOCX, PDF). |
+| **Document Generator** | Generate BRD, TDD, API Spec, User Manual, SOP, Report, **Presentation**, **Meeting Minutes** (Bangla & English), and more. Includes live preview and download (MD, DOCX, PDF). |
 | **Code Generator** | Supports 13 languages (Python, JavaScript, TypeScript, Java, C++, Go, C#, Ruby, PHP, Swift, Kotlin, Rust, Shell Script) with optional frameworks. |
 | **Summarizer** | Summarize text with configurable compression and format. |
 | **Translator** | Bangla ↔ English translation with formality control. |

@@ -99,7 +99,14 @@ def _render_document_generator_tab():
     st.markdown("### 📝 Document Generator")
     st.caption("Generate professional documents like BRDs, TDDs, and Manuals. Upload context files for better accuracy.")
     
-    doc_type = st.selectbox("Type", ["BRD", "TDD", "API Spec", "User Manual", "SOP", "Report", "Presentation", "Other"], key="doc_type")
+    doc_type = st.selectbox("Type", ["BRD", "TDD", "API Spec", "User Manual", "SOP", "Report", "Presentation", "Meeting Minutes", "Other"], key="doc_type")
+    
+    # Language selector for Meeting Minutes
+    if doc_type == "Meeting Minutes":
+        doc_language = st.selectbox("Language", ["English", "Bangla"], key="doc_language")
+    else:
+        doc_language = "English"  # Default for other document types
+    
     doc_style = st.selectbox("Style", ["Professional", "Academic", "Technical", "Simple", "Creative"], key="doc_style")
     include_toc = st.checkbox("Include Table of Contents", value=True, key="doc_toc")
     include_meta = st.checkbox("Include Metadata", key="doc_meta")
@@ -123,6 +130,11 @@ def _render_document_generator_tab():
     if st.button("📄 Generate", type="primary"):
         client = GeminiClient(st.session_state.get("api_key"))
         sys_prompt = f"Write {doc_type}. Style: {doc_style}. Markdown format."
+        
+        # Add language specification for Meeting Minutes
+        if doc_type == "Meeting Minutes":
+            sys_prompt += f" Language: {doc_language}."
+        
         if include_toc:
             sys_prompt += " Include TOC."
         if include_meta:
