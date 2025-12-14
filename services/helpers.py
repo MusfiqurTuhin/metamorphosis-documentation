@@ -172,7 +172,11 @@ def validate_mermaid_syntax(code):
     # 3. Gantt Layout Specifics
     if "gantt" in code.lower() and re.search(r'^\s*today\b', code, re.MULTILINE | re.IGNORECASE):
         errors.append("❌ Gantt Error: Found line starting with 'today'. Mermaid does NOT support defining 'today' manually using a date. REMOVE this line completely.")
-        
+    
+    # Check for invalid comments (//)
+    if "//" in code:
+        errors.append("❌ Syntax Error: Mermaid uses '%%' for comments, not '//'. Replace '//' with '%%' or remove the comment.")
+
     # 4. Mindmap specific: Check for text after node definition on the same line
     if "mindmap" in code.lower():
          lines = code.split('\n')

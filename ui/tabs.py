@@ -213,6 +213,7 @@ def _render_diagram_generator_tab():
      * Sequence: ->> (solid), -->> (dotted), -x (cross)
    - Style/Class: No spaces after commas: color:#000,stroke:#fff (NOT color: #000, stroke: #fff)
    - Blocks: Always close with 'end' statement
+   - Comments: Use `%%` for comments. NEVER use `//` or `#`.
 
 3. **Diagram-Specific Rules (CRITICAL)**
    - **Gantt**: 
