@@ -223,7 +223,7 @@ def _render_diagram_generator_tab():
    - **Mindmap**:
      * Use 2-space indentation strictly.
      * ONE node per line.
-     * NO text allowed after the node definition on the same line.
+     * NO text allowed after the node definition on the same line (e.g. `NodeA(Text) NodeB` is INVALID).
      * **CORRECT**: `    NodeID(Node Text)`
      * **bAD**: `    NodeID(Node Text) ChildNode` (Child MUST be on next line with deeper indentation)
    - **Flowchart**:

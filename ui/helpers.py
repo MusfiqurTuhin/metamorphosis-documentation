@@ -182,16 +182,13 @@ def validate_mermaid_syntax(code):
          lines = code.split('\n')
          for i, line in enumerate(lines):
              # Match lines that look like:  ID(Text) AnyThingElse
-             # simplified check: if line ends with ')' or ']' or ')', it should probably be the end of the line (ignoring whitespace)
-             # Regex explanation:
-             # ^\s*       : Start with whitespace
-             # \S+        : Node ID (non-whitespace)
-             # [\[\(\{]+  : Opening bracket
-             # .*         : Content
-             # [\]\)\}]+  : Closing bracket
-             # \s+\S+     : Space then MORE text (This is the error)
-             if re.search(r'^\s*\S+[\[\(\{]+.*[\]\)\}]+.*\s+\S+', line):
-                 errors.append(f"❌ Mindmap Error (Line {i+1}): Found text after node definition. Ensure each node is on its own line with NO trailing text. (Content: '{line.strip()}')")
-                 break # One is enough to trigger a fix
+             # Updated regex to be more robust:
+             # Look for a closing valid bracket [ ) ] } followed by spaces and then any non-whitespace char.
+             # We want to match:  ...Content)[ ]*TrailiingText
+             if re.search(r'[\]\)\}][\t ]+\S', line):
+                 # Filter out false positives like "Node(A) --> Node(B)" which is valid in some diagrams but not mindmap text based
+                 if "-->" not in line and "---" not in line:
+                    errors.append(f"❌ Mindmap Error (Line {i+1}): Found text after node definition. Ensure each node is on its own line. (Content: '{line.strip()}')")
+                    break
 
     return errors
