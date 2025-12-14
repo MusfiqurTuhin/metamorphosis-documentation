@@ -216,11 +216,12 @@ def validate_mermaid_syntax(code):
     if "mindmap" in code.lower():
          lines = code.split('\n')
          for i, line in enumerate(lines):
-             # Match lines that look like:  ID(Text) AnyThingElse
-             # Updated regex to be more robust:
-             # Look for a closing valid bracket [ ) ] } followed by spaces and then any non-whitespace char.
-             # We want to match:  ...Content)[ ]*TrailiingText
-             if re.search(r'[\]\)\}][\t ]+\S', line):
+             # Match lines that look like:  ID(Text)AnyThingElse
+             # Updated regex to be ultra strict:
+             # Look for a closing valid bracket [ ) ] } that terminates the node definition.
+             # Then check if there is ANY non-whitespace character after it on the same line.
+             # This catches: Node(Text)Text, Node(Text) Text, Node("Text")Text
+             if re.search(r'[\]\)\}][\t ]*\S', line):
                  # Filter out false positives like "Node(A) --> Node(B)" which is valid in some diagrams but not mindmap text based
                  if "-->" not in line and "---" not in line:
                     errors.append(f"❌ Mindmap Error (Line {i+1}): Found text after node definition. Ensure each node is on its own line. (Content: '{line.strip()}')")
@@ -235,5 +236,21 @@ def validate_mermaid_syntax(code):
                  if '"' not in line:
                      errors.append(f"❌ Mindmap Error (Line {i+1}): Text containing brackets '()' or commas MUST be wrapped in double quotes. (e.g. use `Node(\"Text (Detail)\")` instead of `Node(Text (Detail))`)")
                      break # Trigger fix
+
+    # 5. Gantt Specific: Check for invalid date formats and line structure
+    if "gantt" in code.lower():
+        lines = code.split('\n')
+        for i, line in enumerate(lines):
+            line = line.strip()
+            if not line or line.startswith("title") or line.startswith("dateFormat") or line.startswith("axisFormat") or line.startswith("section") or line.startswith("%%"):
+                continue
+            
+            # Simple heuristic for tasks: "Task Name : [crit, active, done etc], [after x], 2023-01-01, 30d"
+            # We want to catch lines that don't look like sections or metadata and are missing dates or duration
+            if ":" in line:
+                 # Check for YYYY-MM-DD
+                 if not re.search(r'\d{4}-\d{2}-\d{2}', line) and not re.search(r'\d+[dwms]', line) and "after" not in line:
+                      errors.append(f"❌ Gantt Error (Line {i+1}): Task seems to be missing a start date (YYYY-MM-DD) or duration (e.g. 5d).")
+
 
     return errors

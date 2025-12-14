@@ -216,19 +216,18 @@ def _render_diagram_generator_tab():
    - Comments: Use `%%` for comments. NEVER use `//` or `#`.
 
 3. **Diagram-Specific Rules (CRITICAL)**
-   - **Gantt**: 
-     * defined `dateFormat YYYY-MM-DD` 
-     * DO NOT use the keyword `today` at start of line (e.g. `today 2023-01-01` is INVALID). Remove it.
-     * All dates must be absolute.
    - **Mindmap**:
      * Use 2-space indentation strictly.
      * ONE node per line.
-     * NO text allowed after the node definition on the same line (e.g. `NodeA(Text) NodeB` is INVALID).
+     * **ABSOLUTE RULE**: NO text allowed after the closing bracket/quote. (e.g. `Node("Text") EXTRA` is FORBIDDEN).
      * **SPECIAL CHARACTERS**: If node text contains `(`, `)`, `[`, `]`, or `,`, you **MUST** wrap the text in double quotes. 
-       * Correct: `NodeOrID("My Text (with details)")`
-       * Incorrect: `NodeOrID(My Text (with details))`
-     * **CORRECT**: `    NodeID(Node Text)`
+     * **CORRECT**: `    NodeID("Node Text")`
      * **bAD**: `    NodeID(Node Text) ChildNode` (Child MUST be on next line with deeper indentation)
+   - **Gantt**: 
+     * defined `dateFormat YYYY-MM-DD` 
+     * DO NOT use the keyword `today` at start of line (e.g. `today 2023-01-01` is INVALID). Remove it.
+     * All dates must be absolute YYYY-MM-DD format. No relative dates like "next week".
+     * Every task MUST have a start date or happen `after` another task.
    - **Flowchart**:
      * Place every node definition on a NEW LINE.
      * Do NOT put multiple nodes on one line like `A[Label] B[Label]`.
