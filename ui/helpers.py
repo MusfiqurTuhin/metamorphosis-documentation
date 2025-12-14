@@ -109,15 +109,15 @@ def sanitize_mermaid_code(raw_text):
     return code
 
 def get_kroki_img(code, format="png"):
-    """Generate diagram using Kroki.io API."""
+    """
+    Generate diagram using Kroki.io API.
+    Uses POST request to avoid URL length limits for large diagrams.
+    """
     try:
-        # Kroki expects raw string -> zlib compress -> base64 url safe
-        # ZLib compression (default wbits)
-        compressed = zlib.compress(code.encode('utf-8'))
-        base64_str = base64.urlsafe_b64encode(compressed).decode('utf-8')
+        url = f"https://kroki.io/mermaid/{format}"
+        # Kroki POST expects raw diagram source in body (uncompressed is fine and standard for POST)
+        response = requests.post(url, data=code.encode('utf-8'))
         
-        url = f"https://kroki.io/mermaid/{format}/{base64_str}"
-        response = requests.get(url)
         if response.status_code == 200:
             return response.content
     except:
