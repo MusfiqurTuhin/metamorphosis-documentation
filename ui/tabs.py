@@ -8,6 +8,7 @@ All Streamlit UI code lives here. Business logic is delegated to
 import streamlit as st
 from services import helpers
 from services.gemini_client import GeminiClient
+from datetime import datetime
 
 # ---------------------------------------------------------------------------
 # Helper wrappers to keep UI code concise
@@ -179,12 +180,22 @@ def _render_diagram_generator_tab():
     diagram_theme = st.selectbox("Theme", ["default", "dark", "forest", "neutral"], key="diagram_theme")
     diagram_type = st.selectbox("Type", ["Flowchart", "Sequence", "ER Diagram", "Gantt", "Mindmap"], key="diagram_type")
     
+    # Gantt Start Date Picker
+    gantt_start_date = None
+    if diagram_type == "Gantt":
+        col1, col2 = st.columns([1, 2])
+        with col1:
+             gantt_start_date = st.date_input("Project Start Date", datetime.now())
+    
     base_code = st.session_state.DIAGRAM_TEMPLATES.get(diagram_template, "") if diagram_template else ""
     custom_code = st.text_area("Context", value=base_code, height=200, key="diagram_code")
     
     if st.button("🎨 Generate", type="primary"):
         client = GeminiClient(st.session_state.get("api_key"))
         
+        # Determine reference date
+        ref_date = gantt_start_date.strftime('%Y-%m-%d') if gantt_start_date else datetime.now().strftime('%Y-%m-%d')
+
         # Optimised System Prompt based on Best Practices
         sys_prompt = f"""You are a Mermaid diagram code generator with ZERO tolerance for syntax errors.
 
@@ -203,11 +214,32 @@ def _render_diagram_generator_tab():
    - Style/Class: No spaces after commas: color:#000,stroke:#fff (NOT color: #000, stroke: #fff)
    - Blocks: Always close with 'end' statement
 
-3. **Validation Checklist Before Output**
+3. **Diagram-Specific Rules (CRITICAL)**
+   - **Gantt**: 
+     * defined `dateFormat YYYY-MM-DD` 
+     * DO NOT use the keyword `today` at start of line (e.g. `today 2023-01-01` is INVALID). Remove it.
+     * All dates must be absolute.
+   - **Mindmap**:
+     * Use 2-space indentation strictly.
+     * ONE node per line.
+     * NO text allowed after the node definition on the same line.
+     * **CORRECT**: `    NodeID(Node Text)`
+     * **bAD**: `    NodeID(Node Text) ChildNode` (Child MUST be on next line with deeper indentation)
+   - **Flowchart**:
+     * Place every node definition on a NEW LINE.
+     * Do NOT put multiple nodes on one line like `A[Label] B[Label]`.
+     * Escape special characters in labels: `["Label (Text)"]`.
+
+4. **Validation Checklist Before Output**
    - [ ] All node IDs are consistent
    - [ ] All opening blocks have closing 'end' statements
    - [ ] All commas in style declarations have NO spaces after
    - [ ] Arrow syntax matches diagram type
+   - [ ] Gantt charts do NOT use 'today'
+   - [ ] Mindmap nodes are on separate lines with NO trailing text
+
+Current Date Reference: {ref_date}
+For Gantt Charts: Start the project timeline from {ref_date}.
 
 Generate syntactically perfect Mermaid code for a {diagram_type}."""
 

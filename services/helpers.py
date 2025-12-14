@@ -169,4 +169,25 @@ def validate_mermaid_syntax(code):
     if total_opens != total_ends:
         errors.append(f"❌ Block Error: Found {total_opens} opening blocks but {total_ends} 'end' statements. Check if all subgraphs/loops are closed.")
 
+    # 3. Gantt Layout Specifics
+    if "gantt" in code.lower() and re.search(r'^\s*today\b', code, re.MULTILINE | re.IGNORECASE):
+        errors.append("❌ Gantt Error: Found line starting with 'today'. Mermaid does NOT support defining 'today' manually using a date. REMOVE this line completely.")
+        
+    # 4. Mindmap specific: Check for text after node definition on the same line
+    if "mindmap" in code.lower():
+         lines = code.split('\n')
+         for i, line in enumerate(lines):
+             # Match lines that look like:  ID(Text) AnyThingElse
+             # simplified check: if line ends with ')' or ']' or ')', it should probably be the end of the line (ignoring whitespace)
+             # Regex explanation:
+             # ^\s*       : Start with whitespace
+             # \S+        : Node ID (non-whitespace)
+             # [\[\(\{]+  : Opening bracket
+             # .*         : Content
+             # [\]\)\}]+  : Closing bracket
+             # \s+\S+     : Space then MORE text (This is the error)
+             if re.search(r'^\s*\S+[\[\(\{]+.*[\]\)\}]+.*\s+\S+', line):
+                 errors.append(f"❌ Mindmap Error (Line {i+1}): Found text after node definition. Ensure each node is on its own line with NO trailing text. (Content: '{line.strip()}')")
+                 break # One is enough to trigger a fix
+
     return errors
