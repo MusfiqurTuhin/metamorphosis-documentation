@@ -232,7 +232,12 @@ def _render_diagram_generator_tab():
      * Place every node definition on a NEW LINE.
      * Do NOT put multiple nodes on one line like `A[Label] B[Label]`.
      * Escape special characters in labels: `["Label (Text)"]`.
-
+     * **NO DANGLING ARROWS**: Every arrow `-->` MUST point to something. (e.g. `A -->` is INVALID).
+   - **ER Diagram**:
+     * Attributes MUST follow format: `type name [PK/FK]`.
+     * **CORRECT**: `string name`, `int id PK`, `string ref_id FK`
+     * **bAD**: `name string`, `Packing_WCID FK VARCHAR` (Do not flip type/name/key).
+ 
 4. **Validation Checklist Before Output**
    - [ ] All node IDs are consistent
    - [ ] All opening blocks have closing 'end' statements

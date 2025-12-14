@@ -252,5 +252,36 @@ def validate_mermaid_syntax(code):
                  if not re.search(r'\d{4}-\d{2}-\d{2}', line) and not re.search(r'\d+[dwms]', line) and "after" not in line:
                       errors.append(f"❌ Gantt Error (Line {i+1}): Task seems to be missing a start date (YYYY-MM-DD) or duration (e.g. 5d).")
 
+    # 6. Flowchart Specific: Check for broken arrows
+    if "flowchart" in code.lower() or "graph" in code.lower():
+         lines = code.split('\n')
+         for i, line in enumerate(lines):
+             line = line.strip()
+             # Check if line ends with an arrow operator without a target
+             # Operators: -->, ---, -.->, ==>
+             if re.search(r'(-{2,}>?|\.-+>|={2,}>)\s*$', line):
+                 errors.append(f"❌ Flowchart Error (Line {i+1}): Line ends with a connector/arrow but has no target node. (Content: '{line}')")
+
+    # 7. ER Diagram Specific: Check for valid attribute definitions
+    if "erDiagram" in code.lower():
+        lines = code.split('\n')
+        for i, line in enumerate(lines):
+            line = line.strip()
+            # Skip relationships (contains --) and entity block starts ({)
+            if regex_relationship := re.search(r'[\}\|o]--[\}\|o]', line): continue
+            if "{" in line or "}" in line: continue
+            
+            # Attribute line usually: type name [PK|FK] [comment]
+            # Bad pattern seen: "Packing_WCID FK VARCHAR S" -> Name Key Type?
+            # We want to enforce: Type Name [Key]
+            # Let's just catch lines that have many words but don't look right
+            words = line.split()
+            if len(words) >= 3:
+                # If the second word is FK or PK, it might be flipped. 
+                # Standard is: string name PK
+                # Bad: name PK string
+                if words[1] in ["PK", "FK"] and len(words) > 2:
+                     # heuristic: formatting error
+                     errors.append(f"❌ ER Diagram Error (Line {i+1}): Attribute seems malformed. Format should be `Type Name [PK/FK]`. (Found: '{line}')")
 
     return errors
