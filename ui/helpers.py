@@ -179,6 +179,34 @@ def convert_to_jpg(image_bytes):
     except:
         return None
 
+def fix_mermaid_syntax(code):
+    """
+    Apply regex-based auto-fixes to common Mermaid errors.
+    This runs BEFORE the LLM validation loop as a fast correction layer.
+    """
+    fixed_lines = []
+    lines = code.split('\n')
+    
+    for line in lines:
+        stripped = line.strip()
+        # Fix 1: Mindmap node with nested parens/commas that are NOT quoted.
+        # Pattern: ID(Text with (parens) or , commas) -> ID("Text with (parens) or , commas")
+        # We look for: (Prefix) (OpenParen) (Content with special chars & no quotes) (CloseParen) (Suffix)
+        # Note: We use the raw line to preserve indentation
+        match = re.search(r'^(\s*\S+)\(([^"]*[\(\),][^"]*)\)(\s*)$', line)
+        if match and "mindmap" in code.lower():
+            prefix = match.group(1)
+            content = match.group(2)
+            suffix = match.group(3)
+            # Apply fix
+            fixed_line = f'{prefix}("{content}"){suffix}'
+            fixed_lines.append(fixed_line)
+            continue
+            
+        fixed_lines.append(line)
+        
+    return '\n'.join(fixed_lines)
+
 def validate_mermaid_syntax(code):
     """
     Validate Mermaid syntax and return a list of specific errors/warnings.

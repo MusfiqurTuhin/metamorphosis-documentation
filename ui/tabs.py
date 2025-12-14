@@ -259,6 +259,9 @@ Generate syntactically perfect Mermaid code for a {diagram_type}."""
         else:
             candidate_code = helpers.sanitize_mermaid_code(res)
             
+            # Layer 0: Regex Auto-Fixer (Pre-Correction)
+            candidate_code = helpers.fix_mermaid_syntax(candidate_code)
+            
             # Validation Layer 1: Check for known syntax issues
             errors = helpers.validate_mermaid_syntax(candidate_code)
             
