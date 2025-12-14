@@ -6,7 +6,7 @@ All Streamlit UI code lives here. Business logic is delegated to
 """
 
 import streamlit as st
-from services import helpers
+from . import helpers
 from services.gemini_client import GeminiClient
 from datetime import datetime
 
