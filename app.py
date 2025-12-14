@@ -77,6 +77,16 @@ CODE_FRAMEWORKS = {
     "TypeScript": ["React", "Angular", "Next.js", "NestJS", "None"]
 }
 
+# Initialize templates in session state
+if 'PROMPT_TEMPLATES' not in st.session_state:
+    st.session_state.PROMPT_TEMPLATES = PROMPT_TEMPLATES
+if 'DIAGRAM_TEMPLATES' not in st.session_state:
+    st.session_state.DIAGRAM_TEMPLATES = DIAGRAM_TEMPLATES
+if 'EMAIL_TEMPLATES' not in st.session_state:
+    st.session_state.EMAIL_TEMPLATES = EMAIL_TEMPLATES
+if 'CODE_FRAMEWORKS' not in st.session_state:
+    st.session_state.CODE_FRAMEWORKS = CODE_FRAMEWORKS
+
 # --- HELPER FUNCTIONS ---
 
 def add_to_history(feature, content, title="Untitled"):

@@ -184,27 +184,70 @@ def _render_diagram_generator_tab():
     
     if st.button("🎨 Generate", type="primary"):
         client = GeminiClient(st.session_state.get("api_key"))
-        sys_prompt = f"You are a Mermaid diagram expert. Generate syntactically perfect Mermaid code for a {diagram_type}."
-        res = client.generate_content(f"{sys_prompt}\n{custom_code}")
+        
+        # Optimised System Prompt based on Best Practices
+        sys_prompt = f"""You are a Mermaid diagram code generator with ZERO tolerance for syntax errors.
+
+## CRITICAL RULES - FOLLOW EVERY TIME:
+
+1. **Output Format**
+   - Generate ONLY valid Mermaid syntax
+   - Wrap code in ```mermaid fences
+   - Never add explanations inside the code block
+
+2. **Syntax Strictness**
+   - Node IDs: Use alphanumeric only (no spaces). Match case exactly throughout.
+   - Arrows: 
+     * Flowchart: --> (solid), -.-> (dotted), ==> (thick)
+     * Sequence: ->> (solid), -->> (dotted), -x (cross)
+   - Style/Class: No spaces after commas: color:#000,stroke:#fff (NOT color: #000, stroke: #fff)
+   - Blocks: Always close with 'end' statement
+
+3. **Validation Checklist Before Output**
+   - [ ] All node IDs are consistent
+   - [ ] All opening blocks have closing 'end' statements
+   - [ ] All commas in style declarations have NO spaces after
+   - [ ] Arrow syntax matches diagram type
+
+Generate syntactically perfect Mermaid code for a {diagram_type}."""
+
+        res = client.generate_content(f"{sys_prompt}\n\nContext/Description:\n{custom_code}")
+        
         if "⚠️" in res or "❌" in res:
-            # Attempt a fix using a secondary AI call
-            fix_prompt = f"Please correct any Mermaid syntax errors in the following code and return only the corrected code:\n{res}"
-            fix_res = client.generate_content(fix_prompt)
-            if "⚠️" in fix_res or "❌" in fix_res:
-                st.error("Failed to generate a valid diagram. Please edit the code manually.")
-                st.code(res, language="mermaid")
-            else:
-                clean_code = fix_res.replace("title:", "title").replace("graph TD    ", "graph TD ")
-                st.session_state.mermaid_code = helpers.sanitize_mermaid_code(clean_code)
-                helpers.add_to_history(st, "Diagrams", st.session_state.mermaid_code, diagram_type)
-                st.success("✅ Diagram generated after auto‑fix!")
-                st.code(st.session_state.mermaid_code, language="mermaid")
+             st.markdown(res)
+             return
         else:
-            clean_code = res.replace("title:", "title").replace("graph TD    ", "graph TD ")
-            st.session_state.mermaid_code = helpers.sanitize_mermaid_code(clean_code)
+            candidate_code = helpers.sanitize_mermaid_code(res)
+            
+            # Validation Layer 1: Check for known syntax issues
+            errors = helpers.validate_mermaid_syntax(candidate_code)
+            
+            if errors:
+                st.warning("⚠️ Initial validation found issues. Attempting auto-fix...")
+                # for e in errors: st.caption(e)
+                
+                # Validation Layer 2: LLM Self-Correction
+                fix_prompt = f"""The following Mermaid code has specific syntax errors. Please FIX them and return ONLY the corrected code.
+
+ERRORS FOUND:
+{chr(10).join(errors)}
+
+BROKEN CODE:
+{candidate_code}
+
+CRITICAL: Fix the style definitions (remove spaces after commas) and close all blocks properly."""
+                
+                fix_res = client.generate_content(fix_prompt)
+                if "⚠️" not in fix_res and "❌" not in fix_res:
+                    candidate_code = helpers.sanitize_mermaid_code(fix_res)
+                    st.success("✅ Auto-corrected syntax errors!")
+                else:
+                    st.error("❌ Auto-fix failed to return valid response.")
+
+            # Final Cleanup
+            clean_code = candidate_code.replace("title:", "title").replace("graph TD    ", "graph TD ")
+            st.session_state.mermaid_code = clean_code
             helpers.add_to_history(st, "Diagrams", st.session_state.mermaid_code, diagram_type)
-            st.success("✅ Diagram generated!")
-            st.code(st.session_state.mermaid_code, language="mermaid")
         # Provide copyable text area and external editor links
         st.text_area("Copy Mermaid Code", st.session_state.mermaid_code, height=200)
         st.markdown("**Render your diagram**: [Mermaid Live Editor](https://mermaid.live) | [Mermaid JS Docs](https://mermaid-js.github.io/mermaid/#/edit) | [Kroki.io](https://kroki.io)" )        

@@ -143,3 +143,30 @@ def convert_to_jpg(image_bytes):
         return output.getvalue()
     except:
         return None
+
+def validate_mermaid_syntax(code):
+    """
+    Validate Mermaid syntax and return a list of specific errors/warnings.
+    Based on common LLM failure modes.
+    """
+    errors = []
+    
+    # 1. Check for spaces after commas in style/classDefs (e.g. "fill:#f9f, stroke:#333")
+    if re.search(r":[#a-zA-Z0-9]+,\s+", code):
+        errors.append("❌ Style Error: Remove spaces after commas in style definitions (e.g., use 'fill:#fff,stroke:#000', NOT 'fill:#fff, stroke:#000').")
+        
+    # 2. Check for unclosed blocks
+    # Keywords that require an 'end'
+    block_keywords = ['subgraph', 'loop', 'opt', 'alt', 'par', 'rect', 'critical', 'break', 'parallel']
+    
+    total_opens = 0
+    total_ends = len(re.findall(r'\\bend\\b', code, re.IGNORECASE))
+    
+    for kw in block_keywords:
+        opens = len(re.findall(f'\\b{kw}\\b', code, re.IGNORECASE))
+        total_opens += opens
+        
+    if total_opens != total_ends:
+        errors.append(f"❌ Block Error: Found {total_opens} opening blocks but {total_ends} 'end' statements. Check if all subgraphs/loops are closed.")
+
+    return errors
