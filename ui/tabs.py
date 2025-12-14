@@ -298,7 +298,7 @@ CRITICAL: Fix the style definitions (remove spaces after commas) and close all b
         st.markdown("**Render your diagram**: [Mermaid Live Editor](https://mermaid.live) | [Mermaid JS Docs](https://mermaid-js.github.io/mermaid/#/edit) | [Kroki.io](https://kroki.io)" )        
         
         # Generate PNG for preview and download
-        png = helpers.get_mermaid_img(st.session_state.mermaid_code, "png")
+        png = helpers.get_mermaid_img(st.session_state.mermaid_code, "png", diagram_theme)
         
         # Preview Image
         if png:
@@ -318,7 +318,7 @@ CRITICAL: Fix the style definitions (remove spaces after commas) and close all b
                 if jpg:
                     st.download_button("JPG", jpg, "diagram.jpg", use_container_width=True)
         with dl3:
-            svg = helpers.get_mermaid_img(st.session_state.mermaid_code, "svg")
+            svg = helpers.get_mermaid_img(st.session_state.mermaid_code, "svg", diagram_theme)
             if svg:
                 st.download_button("SVG", svg, "diagram.svg", use_container_width=True)
 

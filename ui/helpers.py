@@ -108,18 +108,19 @@ def sanitize_mermaid_code(raw_text):
         code = raw_text.replace("```mermaid", "").replace("```", "").strip()
     return code
 
-def get_mermaid_img(code, format="png"):
+def get_mermaid_img(code, format="png", theme="default"):
     """Generate Mermaid image using mermaid.ink API."""
     state = {
         "code": code,
-        "mermaid": {"theme": "default", "securityLevel": "loose"},
+        "mermaid": {"theme": theme, "securityLevel": "loose"},
         "autoSync": True,
         "updateDiagram": True
     }
     json_str = json.dumps(state)
     compressor = zlib.compressobj(9, zlib.DEFLATED, -15, 8, zlib.Z_DEFAULT_STRATEGY)
     compressed = compressor.compress(json_str.encode('utf-8')) + compressor.flush()
-    base64_str = base64.urlsafe_b64encode(compressed).decode('utf-8')
+    # Strip padding from base64 string, as required by mermaid.ink/pako
+    base64_str = base64.urlsafe_b64encode(compressed).decode('utf-8').rstrip('=')
     
     url = f"https://mermaid.ink/img/pako:{base64_str}"
     if format == "svg":
