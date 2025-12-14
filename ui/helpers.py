@@ -187,21 +187,80 @@ def fix_mermaid_syntax(code):
     fixed_lines = []
     lines = code.split('\n')
     
+    is_mindmap = "mindmap" in code.lower()
+    is_flowchart = "flowchart" in code.lower() or "graph" in code.lower()
+    
     for line in lines:
         stripped = line.strip()
+        
+        # Global Fix: Strip inline comments (%%) from end of lines
+        # But be careful not to strip %% inside quotes? 
+        # Simpler approach: If line contains `%%`, remove everything after it, UNLESS the line is just a full comment
+        if "%%" in line and not stripped.startswith("%%"):
+             # Split and keep first part
+             parts = line.split("%%")
+             # Retain original indentation of the left part
+             line = parts[0].rstrip() 
+             
         # Fix 1: Mindmap node with nested parens/commas that are NOT quoted.
-        # Pattern: ID(Text with (parens) or , commas) -> ID("Text with (parens) or , commas")
-        # We look for: (Prefix) (OpenParen) (Content with special chars & no quotes) (CloseParen) (Suffix)
-        # Note: We use the raw line to preserve indentation
-        match = re.search(r'^(\s*\S+)\(([^"]*[\(\),][^"]*)\)(\s*)$', line)
-        if match and "mindmap" in code.lower():
-            prefix = match.group(1)
-            content = match.group(2)
-            suffix = match.group(3)
-            # Apply fix
-            fixed_line = f'{prefix}("{content}"){suffix}'
-            fixed_lines.append(fixed_line)
-            continue
+        if is_mindmap:
+            # Handle Double Parentheses specially: root((Text))
+            # 1. Check for double parens explicitly first
+            # regex: (prefix)((content))(suffix)
+            double_match = re.search(r'^(\s*[^(\n]*)\(\(([^"]*)\)\)(\s*)$', line)
+            if double_match:
+                 # Check if content needs quoting (has special chars or is just plain)
+                 # Actually, for consistency, we can just quote everything inside ((...)) if it's not already quoted?
+                 # But usually ((Circle)) is fine. The issue is if content has special chars.
+                 # Let's simple-check: IF content has ( or ) or , AND is not quoted -> Quote it.
+                 content = double_match.group(2)
+                 if any(c in content for c in "(),") and not (content.startswith('"') and content.endswith('"')):
+                     prefix = double_match.group(1)
+                     suffix = double_match.group(3)
+                     fixed_line = f'{prefix}(("{content}")){suffix}'
+                     fixed_lines.append(fixed_line)
+                     continue
+
+            # 2. Standard Mindmap: ID(Text with (parens) or , commas) -> ID("Text ...")
+            # ALLOW spaces in ID precursor: ^(\s*[^(\n]+)\(
+            # This captures: "  My Node ID (Content)"
+            match = re.search(r'^(\s*[^(\n]*)\(([^"]*[\(\),][^"]*)\)(\s*)$', line)
+            if match:
+                # We need to make sure this wasn't actually a double paren case that slipped through?
+                # The previous regex `[^"]*` is greedy. 
+                # If the line is `root((Garment))`, match group 1 is `root(`, group 2 is `Garment`.
+                # This logic BREAKS valid double parens if we blindly quote.
+                # FIX: Verify that the char BEFORE `(` is NOT `(` and char AFTER `)` is NOT `)`?
+                # Easier: Check if line contains `((` and skip this single-paren Fix?
+                if "((" in line:
+                    fixed_lines.append(line)
+                    continue
+
+                prefix = match.group(1)
+                content = match.group(2)
+                suffix = match.group(3)
+                # Apply fix
+                fixed_line = f'{prefix}("{content}"){suffix}'
+                fixed_lines.append(fixed_line)
+                continue
+                
+        # Fix 2: Flowchart node label quoting
+        if is_flowchart:
+            # Pattern: ID[Text with (parens) or special chars] -> ID["Text ..."]
+            # Regex: (ID) [ (Content) ] (Suffix)
+            # Find unquoted content inside [] that contains ( or )
+            match = re.search(r'(\S+)\[([^"\]]*[\(\)][^"\]]*)\]', line)
+            if match:
+                # Reconstruct line with quotes around the content inside []
+                # Note: This is a robust replacement for the match
+                start, end = match.span()
+                node_id = match.group(1)
+                content = match.group(2)
+                
+                # Check strictness: if content is already quoted? Regex `[^"]` handles it partially.
+                # Replace the match segment
+                new_segment = f'{node_id}["{content}"]'
+                line = line[:start] + new_segment + line[end:]
             
         fixed_lines.append(line)
         
