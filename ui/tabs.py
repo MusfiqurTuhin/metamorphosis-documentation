@@ -281,15 +281,31 @@ CRITICAL: Fix the style definitions (remove spaces after commas) and close all b
             clean_code = candidate_code.replace("title:", "title").replace("graph TD    ", "graph TD ")
             st.session_state.mermaid_code = clean_code
             helpers.add_to_history(st, "Diagrams", st.session_state.mermaid_code, diagram_type)
-        # Provide copyable text area and external editor links
-        st.text_area("Copy Mermaid Code", st.session_state.mermaid_code, height=200)
-        st.markdown("**Render your diagram**: [Mermaid Live Editor](https://mermaid.live) | [Mermaid JS Docs](https://mermaid-js.github.io/mermaid/#/edit) | [Kroki.io](https://kroki.io)" )        
-        # Show code in expander
-        with st.expander("📝 View Mermaid Code"):
-            st.code(st.session_state.mermaid_code, language="mermaid")
+
         
-        # Generate PNG for download
+    # --- LIVE EDITOR & PREVIEW ---
+    if "mermaid_code" in st.session_state:
+        st.markdown("#### 📝 Live Editor")
+        st.caption("Edit the code below to update the diagram in real-time.")
+        
+        # Live Editor Text Area
+        edited_code = st.text_area("Mermaid Code", value=st.session_state.mermaid_code, height=300, label_visibility="collapsed")
+        
+        # Update session state if user edited the code
+        if edited_code != st.session_state.mermaid_code:
+            st.session_state.mermaid_code = edited_code
+
+        st.markdown("**Render your diagram**: [Mermaid Live Editor](https://mermaid.live) | [Mermaid JS Docs](https://mermaid-js.github.io/mermaid/#/edit) | [Kroki.io](https://kroki.io)" )        
+        
+        # Generate PNG for preview and download
         png = helpers.get_mermaid_img(st.session_state.mermaid_code, "png")
+        
+        # Preview Image
+        if png:
+             st.image(png, caption="Rendered Diagram", use_container_width=True)
+        else:
+             st.warning("⚠️ Could not render diagram. Check syntax.")
+
         # Download options
         st.markdown("#### 💾 Downloads")
         dl1, dl2, dl3 = st.columns(3)
@@ -305,12 +321,6 @@ CRITICAL: Fix the style definitions (remove spaces after commas) and close all b
             svg = helpers.get_mermaid_img(st.session_state.mermaid_code, "svg")
             if svg:
                 st.download_button("SVG", svg, "diagram.svg", use_container_width=True)
-        # Edit mode
-        with st.expander("✏️ Edit Code"):
-            edited = st.text_area("Mermaid Code", st.session_state.mermaid_code, height=200)
-            if st.button("🔄 Update Preview"):
-                st.session_state.mermaid_code = edited
-                st.rerun()
 
 def _render_code_generator_tab():
     st.markdown("### 💻 Code Generator")
