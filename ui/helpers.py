@@ -108,8 +108,42 @@ def sanitize_mermaid_code(raw_text):
         code = raw_text.replace("```mermaid", "").replace("```", "").strip()
     return code
 
+def get_kroki_img(code, format="png"):
+    """Generate diagram using Kroki.io API."""
+    try:
+        # Kroki expects raw string -> zlib compress -> base64 url safe
+        # ZLib compression (default wbits)
+        compressed = zlib.compress(code.encode('utf-8'))
+        base64_str = base64.urlsafe_b64encode(compressed).decode('utf-8')
+        
+        url = f"https://kroki.io/mermaid/{format}/{base64_str}"
+        response = requests.get(url)
+        if response.status_code == 200:
+            return response.content
+    except:
+        return None
+    return None
+
 def get_mermaid_img(code, format="png", theme="default"):
-    """Generate Mermaid image using mermaid.ink API."""
+    """
+    Generate Mermaid image.
+    Attempts Kroki.io first (more robust), falls back to mermaid.ink.
+    """
+    # 1. Try Kroki (Primary)
+    # Note: Kroki doesn't support 'theme' via URL easily for Mermaid, it renders default.
+    # But it handles complex syntax much better.
+    # We inject theme directive into the code if possible
+    kroki_code = code
+    if "%%{init:" not in code and theme != "default":
+        # Inject theme directive
+        theme_json = json.dumps({"theme": theme})
+        kroki_code = f"%%{{init: {theme_json} }}%%\n{code}"
+        
+    img = get_kroki_img(kroki_code, format)
+    if img:
+        return img
+        
+    # 2. Fallback to mermaid.ink
     state = {
         "code": code,
         "mermaid": {"theme": theme, "securityLevel": "loose"},
