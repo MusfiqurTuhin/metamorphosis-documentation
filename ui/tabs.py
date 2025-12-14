@@ -224,6 +224,9 @@ def _render_diagram_generator_tab():
      * Use 2-space indentation strictly.
      * ONE node per line.
      * NO text allowed after the node definition on the same line (e.g. `NodeA(Text) NodeB` is INVALID).
+     * **SPECIAL CHARACTERS**: If node text contains `(`, `)`, `[`, `]`, or `,`, you **MUST** wrap the text in double quotes. 
+       * Correct: `NodeOrID("My Text (with details)")`
+       * Incorrect: `NodeOrID(My Text (with details))`
      * **CORRECT**: `    NodeID(Node Text)`
      * **bAD**: `    NodeID(Node Text) ChildNode` (Child MUST be on next line with deeper indentation)
    - **Flowchart**:

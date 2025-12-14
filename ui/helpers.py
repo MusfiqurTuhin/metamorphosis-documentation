@@ -191,5 +191,15 @@ def validate_mermaid_syntax(code):
                  if "-->" not in line and "---" not in line:
                     errors.append(f"❌ Mindmap Error (Line {i+1}): Found text after node definition. Ensure each node is on its own line. (Content: '{line.strip()}')")
                     break
+             
+             # Check for unquoted special characters inside the node text (e.g. Node(Text (Detail)))
+             # This creates a basic check: if we see '(', ')', or ',' inside the node content AND it's not wrapped in quotes.
+             # Regex detects: ID( ... [(),] ... ) where no quotes " are present.
+             # We look for: non-quote chars, then special char, then non-quote chars inside brackets
+             if re.search(r'[\(\[\{][^"]*[\(\),][^"]*[\)\]\}]', line):
+                 # Refined check: does the line contain double quotes?
+                 if '"' not in line:
+                     errors.append(f"❌ Mindmap Error (Line {i+1}): Text containing brackets '()' or commas MUST be wrapped in double quotes. (e.g. use `Node(\"Text (Detail)\")` instead of `Node(Text (Detail))`)")
+                     break # Trigger fix
 
     return errors
